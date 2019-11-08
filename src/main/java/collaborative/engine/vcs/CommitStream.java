@@ -9,7 +9,7 @@ public interface CommitStream {
 
     void close();
 
-    CommitStream onNext(Consumer<Commit> action);
+    CommitStream onNewVersion(Consumer<Commit> action);
 
     CommitStream onClose(Runnable closeHandler);
 
