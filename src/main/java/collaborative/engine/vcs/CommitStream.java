@@ -9,11 +9,11 @@ public interface CommitStream {
 
     void close();
 
-    CommitStream onNewVersion(Consumer<Commit> action);
+    CommitStream onNewVersion(Consumer<CommitInfo> action);
 
     CommitStream onClose(Runnable closeHandler);
 
-    CommitStream currentCommit(Consumer<Commit> action);
+    CommitStream currentCommit(Consumer<CommitInfo> action);
 
-    CommitStream moveTo(Commit commit);
+    CommitStream moveTo(CommitInfo commitInfo);
 }

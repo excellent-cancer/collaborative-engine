@@ -1,4 +1,4 @@
 package collaborative.engine.vcs;
 
-public class Commit {
+public class CommitInfo {
 }

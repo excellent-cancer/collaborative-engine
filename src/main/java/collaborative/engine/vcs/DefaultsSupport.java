@@ -25,16 +25,16 @@ final class DefaultsSupport {
         }
 
         @Override
-        public void subscribe(Flow.Subscriber<? super Commit> subscriber) {
+        public void subscribe(Flow.Subscriber<? super CommitInfo> subscriber) {
             subscriber.onSubscribe(new DefaultSubscription(subscriber));
         }
 
         class DefaultSubscription implements Flow.Subscription {
-            private final Flow.Subscriber<? super Commit> commitSubscriber;
+            private final Flow.Subscriber<? super CommitInfo> commitSubscriber;
             private volatile boolean completed;
             private volatile boolean cancelled;
 
-            DefaultSubscription(Flow.Subscriber<? super Commit> commitSubscriber) {
+            DefaultSubscription(Flow.Subscriber<? super CommitInfo> commitSubscriber) {
                 this.commitSubscriber = commitSubscriber;
             }
 

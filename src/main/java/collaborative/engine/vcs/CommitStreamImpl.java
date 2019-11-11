@@ -14,25 +14,25 @@ import static java.util.Objects.requireNonNull;
 
 public class CommitStreamImpl extends AbstractCommitStream {
 
-    private static final AtomicReferenceFieldUpdater<CommitStreamImpl, Commit> COMMIT_UPDATER =
-            AtomicReferenceFieldUpdater.newUpdater(CommitStreamImpl.class, Commit.class, "referenceCommit");
+    private static final AtomicReferenceFieldUpdater<CommitStreamImpl, CommitInfo> COMMIT_UPDATER =
+            AtomicReferenceFieldUpdater.newUpdater(CommitStreamImpl.class, CommitInfo.class, "referenceCommitInfo");
 
     private final UUID uuid = UUID.randomUUID();
 
     private final CommitSubscriber commitSubscriber = new CommitSubscriber();
-    private volatile Commit referenceCommit = null;
+    private volatile CommitInfo referenceCommitInfo = null;
     private ConcurrentLinkedQueue<Runnable> closeActions = new ConcurrentLinkedQueue<>();
-    private ConcurrentLinkedQueue<Consumer<Commit>> newVersionActions = new ConcurrentLinkedQueue<>();
+    private ConcurrentLinkedQueue<Consumer<CommitInfo>> newVersionActions = new ConcurrentLinkedQueue<>();
 
     private volatile boolean closed = false;
 
     @Override
-    Flow.Subscriber<Commit> subscriber() {
+    Flow.Subscriber<CommitInfo> subscriber() {
         return commitSubscriber;
     }
 
     @Override
-    public CommitStream onNewVersion(@NotNull Consumer<Commit> action) {
+    public CommitStream onNewVersion(@NotNull Consumer<CommitInfo> action) {
         predicateClosed();
         requireNonNull(action);
         newVersionActions.add(action);
@@ -48,16 +48,16 @@ public class CommitStreamImpl extends AbstractCommitStream {
     }
 
     @Override
-    public CommitStream currentCommit(@NotNull Consumer<Commit> action) {
+    public CommitStream currentCommit(@NotNull Consumer<CommitInfo> action) {
         predicateClosed();
         Objects.requireNonNull(action);
-        action.accept(commitSubscriber.latestCommit);
+        action.accept(commitSubscriber.latestCommitInfo);
         return this;
     }
 
     @Override
-    public CommitStream moveTo(@NotNull Commit commit) {
-        COMMIT_UPDATER.set(this, commit);
+    public CommitStream moveTo(@NotNull CommitInfo commitInfo) {
+        COMMIT_UPDATER.set(this, commitInfo);
         return this;
     }
 
@@ -85,9 +85,9 @@ public class CommitStreamImpl extends AbstractCommitStream {
         }
     }
 
-    class CommitSubscriber implements Flow.Subscriber<Commit> {
+    class CommitSubscriber implements Flow.Subscriber<CommitInfo> {
         private volatile Flow.Subscription subscription;
-        private volatile Commit latestCommit = null;
+        private volatile CommitInfo latestCommitInfo = null;
         private final AtomicBoolean subscribed = new AtomicBoolean();
         private final AtomicBoolean currentSubscribed = new AtomicBoolean();
 
@@ -114,9 +114,9 @@ public class CommitStreamImpl extends AbstractCommitStream {
         }
 
         @Override
-        public void onNext(Commit item) {
+        public void onNext(CommitInfo item) {
             // TODO 这里绝对不正确
-            this.latestCommit = item;
+            this.latestCommitInfo = item;
             if (currentSubscribed.compareAndSet(true, false)) {
                 newVersionActions.forEach(action -> action.accept(item));
             }

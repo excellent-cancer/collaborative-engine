@@ -4,6 +4,6 @@ import java.util.concurrent.Flow;
 
 public abstract class AbstractCommitStream implements CommitStream {
 
-    abstract Flow.Subscriber<Commit> subscriber();
+    abstract Flow.Subscriber<CommitInfo> subscriber();
 
 }

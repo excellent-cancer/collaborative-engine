@@ -1,13 +1,11 @@
 package collaborative.engine.vcs;
 
-import org.jetbrains.annotations.NotNull;
-
 import java.util.concurrent.Flow;
 
-public interface CommitStreamFactory extends Flow.Publisher<Commit> {
+public interface CommitStreamFactory extends Flow.Publisher<CommitInfo> {
 
     CommitStream newCommitStream();
 
     @Override
-    void subscribe(Flow.Subscriber<? super Commit> subscriber);
+    void subscribe(Flow.Subscriber<? super CommitInfo> subscriber);
 }
