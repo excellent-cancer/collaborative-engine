@@ -15,6 +15,8 @@ public class EditOperationRequest {
 
     private String endColumn;
 
+    private long modifyTime;
+
     public String getStatus() {
         return status;
     }
@@ -69,5 +71,13 @@ public class EditOperationRequest {
 
     public void setEndColumn(String endColumn) {
         this.endColumn = endColumn;
+    }
+
+    public long getModifyTime() {
+        return modifyTime;
+    }
+
+    public void setModifyTime(long modifyTime) {
+        this.modifyTime = modifyTime;
     }
 }

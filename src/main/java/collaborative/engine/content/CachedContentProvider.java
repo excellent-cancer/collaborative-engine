@@ -39,4 +39,9 @@ class CachedContentProvider implements ContentProvider {
 
         return new CachedContentProvider(path.toFile());
     }
+
+    @Override
+    public ContentInfo contentInfo() {
+        return null;
+    }
 }

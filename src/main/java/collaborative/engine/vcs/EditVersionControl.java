@@ -9,19 +9,27 @@ import collaborative.engine.operation.EditOperationRequest;
 import java.nio.file.Path;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.PriorityBlockingQueue;
 import java.util.function.Function;
 import java.util.function.Supplier;
+
+import static java.util.concurrent.Flow.Publisher;
+import static java.util.concurrent.Flow.Subscriber;
 
 /**
  * 代表版本控制的对象
  * @author XyParaCrim
  */
-public class EditVersionControl extends DisposableService {
+public class EditVersionControl extends DisposableService implements Publisher<CommitInfo> {
 
     private final ContentProvider contentProvider;
     private final CommitStreamFactory commitStreamFactory;
+    private final ChangesControl changesControl = new ChangesControl();
 
-    /* 战术乱写 */
+    private ConcurrentLinkedQueue<EditOperation> editOperations;
+
+    private Dispatcher dispatcher;
+    private Thread mainThread;
 
     private EditVersionControl(EditVersionControlBuilder builder) {
         this.contentProvider = builder.contentProviderSupplier.get();
@@ -32,26 +40,34 @@ public class EditVersionControl extends DisposableService {
         return commitStreamFactory.newCommitStream();
     }
 
-    private ConcurrentLinkedQueue<EditOperation> handlerQueue;
+    @Override
+    public void subscribe(Subscriber<? super CommitInfo> subscriber) {
+
+    }
 
     @Override
     public void start() {
         if (lifecycle.tryStarted()) {
-            handlerQueue = new ConcurrentLinkedQueue<>();
-            Runnable process = new Dispatcher();
-            Thread processThread = new Thread(null, process, "edit-process", 0, false);
-            processThread.start();
+            dispatcher = new Dispatcher();
+            mainThread = new Thread(null, dispatcher, "edit-process", 0, false);
+            mainThread.start();
         }
     }
 
     @Override
     public void close() {
-
+        if (lifecycle.tryClosed()) {
+            mainThread.isInterrupted();
+        }
     }
 
-    /* 乱写 */
-    public void handle(EditOperationRequest request) {
-        handlerQueue.add(EditOperation.from(request));
+    public void commit(EditOperationRequest request) {
+        if (!lifecycle.isStarted()) {
+            throw new IllegalStateException();
+        }
+        Objects.requireNonNull(request);
+        dispatcher.operationRequests.add(request);
+
     }
 
     public static EditVersionControlBuilder newBuilder() {
@@ -59,10 +75,13 @@ public class EditVersionControl extends DisposableService {
     }
 
     private class Dispatcher implements Runnable {
+
+        PriorityBlockingQueue<EditOperationRequest> operationRequests = new PriorityBlockingQueue<>(128, (t1, t2) -> t1.getModifyTime() > t2.getModifyTime() ? 1 : 0);
+
         @Override
         public void run() {
             while (!lifecycle.isClose()) {
-                EditOperation operation = handlerQueue.poll();
+                EditOperation operation = operationRequests.poll();
                 if (operation != null) {
 
                 }
