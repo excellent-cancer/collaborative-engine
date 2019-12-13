@@ -34,4 +34,8 @@ public class WorkLocal {
     public <T> boolean setParameterIfAbsent(Parameter<T> parameter, T value) {
         return false;
     }
+
+    public <T> void setParameter(Parameter<T> parameter, T value) {
+
+    }
 }

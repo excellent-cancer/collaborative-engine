@@ -29,4 +29,10 @@ public final class ParameterSeriesGroup {
     public static final ParameterSeries LOG_CONFIG =
             ParameterSupport.prefix("log");
 
+    /**
+     * Some global parameters that is not important for this project.
+     */
+    public static final ParameterSeries BASE_PARAMETER =
+            ParameterSupport.prefix("base");
+
 }

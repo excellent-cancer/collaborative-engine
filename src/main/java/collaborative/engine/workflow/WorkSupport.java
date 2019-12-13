@@ -1,4 +1,8 @@
 package collaborative.engine.workflow;
 
-public class WorkSupport {
+public final class WorkSupport {
+
+
+
+
 }
