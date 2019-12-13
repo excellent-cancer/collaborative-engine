@@ -2,7 +2,7 @@ package collaborative.engine;
 
 import collaborative.engine.workflow.Workflow;
 import collaborative.engine.workflow.WorkflowFactory;
-import collaborative.engine.workflow.phase.ConfigFileWork;
+import collaborative.engine.workflow.parameterize.ConfigDirectoryWork;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -28,7 +28,7 @@ public final class CollaborativeEngine {
     public static void run(String configDirectory) {
         if (LIFECYCLE.tryStarted()) {
             LOGGER.trace("collaborative-engine is starting...");
-            ROOT_WORKFLOW = WorkflowFactory.bootstrap(new ConfigFileWork(configDirectory));
+            ROOT_WORKFLOW = WorkflowFactory.bootstrap(new ConfigDirectoryWork(configDirectory));
         } else {
             LOGGER.warn("try to run collaborative-engine, but is's running.");
         }

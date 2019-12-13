@@ -9,10 +9,13 @@ public interface Parameter<T> {
     }
 
     default void set(ParameterVariables variables) {
-
     }
 
     default T defaultValue() {
+        return null;
+    }
+
+    default String name() {
         return null;
     }
 }

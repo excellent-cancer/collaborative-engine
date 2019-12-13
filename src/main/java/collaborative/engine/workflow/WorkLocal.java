@@ -5,6 +5,10 @@ import collaborative.engine.parameterization.ParameterVariables;
 
 import java.util.Objects;
 
+/**
+ *  Provides access to the parameter set and save workflow variables.
+ * @author XyParaCrim
+ */
 public class WorkLocal {
 
     private final ParameterVariables parameterStore;
@@ -25,5 +29,9 @@ public class WorkLocal {
                         value :
                 null;
 
+    }
+
+    public <T> boolean setParameterIfAbsent(Parameter<T> parameter, T value) {
+        return false;
     }
 }
