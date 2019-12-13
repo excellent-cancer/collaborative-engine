@@ -18,7 +18,7 @@ public class ChangesControl {
     private final ConcurrentLinkedQueue<StringBuffer> linesBuffer = new ConcurrentLinkedQueue<>();
 
     public ChangesControl() {
-        aliveChanges.put(EMPTY_VERSION, head = tail = Change.make());
+        //aliveChanges.put(EMPTY_VERSION, head = tail = Change.make());
     }
 
     public void commitEditOperation(EditOperation editOperation) {

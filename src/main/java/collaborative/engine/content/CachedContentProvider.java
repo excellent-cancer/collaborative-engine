@@ -16,8 +16,14 @@ class CachedContentProvider implements ContentProvider {
     private final File file;
     private final ConcurrentLinkedQueue<StringBuffer> linesBuffer;
 
-    private CachedContentProvider(File file) throws IOException {
-        List<String> lines = Files.readAllLines(file.toPath());
+    private CachedContentProvider(File file) {
+        List<String> lines = null;
+        try {
+            lines = Files.readAllLines(file.toPath());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        assert lines != null;
         this.linesBuffer = lines.stream()
                 .map(StringBuffer::new)
                 .collect(Collectors.toCollection(ConcurrentLinkedQueue::new));
@@ -25,7 +31,7 @@ class CachedContentProvider implements ContentProvider {
     }
 
     @NotNull
-    static CachedContentProvider newProvider(@NotNull File file) throws IOException {
+    static CachedContentProvider newProvider(@NotNull File file) {
         Objects.requireNonNull(file);
         Files.isWritable(file.toPath());
 
@@ -33,7 +39,7 @@ class CachedContentProvider implements ContentProvider {
     }
 
     @NotNull
-    static CachedContentProvider newProvider(@NotNull Path path) throws IOException {
+    static CachedContentProvider newProvider(@NotNull Path path) {
         Objects.requireNonNull(path);
         Files.isWritable(path);
 

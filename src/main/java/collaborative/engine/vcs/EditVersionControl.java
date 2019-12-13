@@ -80,12 +80,12 @@ public class EditVersionControl extends DisposableService implements Publisher<C
 
         @Override
         public void run() {
-            while (!lifecycle.isClose()) {
+/*            while (!lifecycle.isClose()) {
                 EditOperation operation = operationRequests.poll();
                 if (operation != null) {
 
                 }
-            }
+            }*/
         }
     }
 

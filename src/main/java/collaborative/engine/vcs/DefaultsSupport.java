@@ -19,7 +19,7 @@ final class DefaultsSupport {
 
         @Override
         public CommitStream newCommitStream() {
-            AbstractCommitStream commitStream = new new CommitStreamImpl();
+            AbstractCommitStream commitStream = new CommitStreamImpl();
             subscribe(commitStream.subscriber());
             return commitStream;
         }

@@ -4,6 +4,7 @@ import collaborative.engine.disposable.Disposable;
 
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 
+@Deprecated
 public abstract class DisposableService implements Disposable {
 
     protected final ServiceLifecycle lifecycle = new ServiceLifecycle();
