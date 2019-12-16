@@ -1,7 +1,7 @@
 package collaborative.engine.workflow.parameterize;
 
 import collaborative.engine.workflow.Work;
-import collaborative.engine.workflow.WorkLocal;
+import collaborative.engine.workflow.WorkProcessing;
 import collaborative.engine.workflow.Workflow;
 
 import java.nio.file.Path;
@@ -16,10 +16,10 @@ import static collaborative.engine.ParameterGroup.USER_DIRECTORY;
 public class PrepareWork implements Work {
 
     @Override
-    public Workflow proceed(WorkLocal workLocal, Workflow workflow) {
+    public Workflow proceed(WorkProcessing workProcessing, Workflow workflow) {
         Path usrDir = Paths.get(System.getProperty("user.dir"));
 
-        workLocal.setParameter(USER_DIRECTORY, usrDir);
+        workProcessing.setParameter(USER_DIRECTORY, usrDir);
 
         return null;
     }

@@ -41,5 +41,4 @@ public class CollaborativeEngineTest {
         final Logger LOGGER = LogManager.getLogger(CollaborativeEngineTest.class);
         LOGGER.info("this's normal");
     }
-
 }

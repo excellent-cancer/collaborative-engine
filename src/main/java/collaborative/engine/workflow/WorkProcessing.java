@@ -2,6 +2,9 @@ package collaborative.engine.workflow;
 
 import collaborative.engine.parameterization.Parameter;
 import collaborative.engine.parameterization.ParameterVariables;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import pact.etc.ConfigureCheckProcessing;
 
 import java.util.Objects;
 
@@ -9,11 +12,18 @@ import java.util.Objects;
  *  Provides access to the parameter set and save workflow variables.
  * @author XyParaCrim
  */
-public class WorkLocal {
+public class WorkProcessing implements ConfigureCheckProcessing {
+
+    private static final Logger LOGGER = LogManager.getLogger(WorkProcessing.class);
 
     private final ParameterVariables parameterStore;
 
-    public WorkLocal(ParameterVariables parameterStore) {
+    @Override
+    public Logger logger() {
+        return LOGGER;
+    }
+
+    public WorkProcessing(ParameterVariables parameterStore) {
         this.parameterStore = Objects.requireNonNull(parameterStore, "parameterStore is required");
     }
 

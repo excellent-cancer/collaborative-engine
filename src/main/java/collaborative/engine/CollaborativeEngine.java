@@ -5,6 +5,8 @@ import collaborative.engine.workflow.WorkflowFactory;
 import collaborative.engine.workflow.parameterize.ConfigDirectoryWork;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import pact.component.lifecycle.LifecycleFactory;
+import pact.component.lifecycle.ServiceLifecycle;
 
 /**
  * Collaborative engine facade

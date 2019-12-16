@@ -16,5 +16,7 @@ public final class ParameterGroup {
 
     public static final Parameter<Path> DTAT_DIRECTORY = COLLABORATIVE_ENGINE_CONFIG.make("dataDirectory");
 
+    public static final Parameter<Path> COLLABORATIVE_CONFIG_FILE = COLLABORATIVE_ENGINE_CONFIG.make("configFile");
+
     public static final Parameter<Path> USER_DIRECTORY = BASE_PARAMETER.make("usrDirectory");
 }

@@ -2,7 +2,7 @@ package collaborative.engine.workflow.parameterize;
 
 import collaborative.engine.content.ContentSupport;
 import collaborative.engine.workflow.Work;
-import collaborative.engine.workflow.WorkLocal;
+import collaborative.engine.workflow.WorkProcessing;
 import collaborative.engine.workflow.Workflow;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -13,26 +13,18 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Map;
 
-import static collaborative.engine.ParameterGroup.CONFIG_DIRECTORY;
-import static collaborative.engine.ParameterGroup.USER_DIRECTORY;
+import static collaborative.engine.ParameterGroup.*;
 
 /**
  * @author XyParaCrim
  */
-class LoadConfigWork implements Work {
+class LoadConfigWork implements Work.UncheckedWork {
 
     private static final Logger LOGGER = LogManager.getLogger(LoadConfigWork.class);
 
     @Override
-    public Workflow proceed(WorkLocal workLocal, Workflow workflow) {
-        Path directoryPath = workLocal.parameter(CONFIG_DIRECTORY);
-
-        // validate if collaborative.yaml exists
-        Path collaborativeYaml = directoryPath.resolve("collaborative.yaml");
-        if (!Files.exists(collaborativeYaml)) {
-            LOGGER.error("collaborative.yaml file does not exist");
-            return workflow.fail();
-        }
+    public Workflow proceed(WorkProcessing workProcessing, Workflow workflow) {
+        Path collaborativeYaml = workProcessing.parameter(COLLABORATIVE_CONFIG_FILE);
 
         // load config from collaborative.yaml as map
         Map<String, Object> properties;
@@ -44,7 +36,7 @@ class LoadConfigWork implements Work {
         }
 
         // build parameter from properties
-        if (!buildParameterFromProperties(properties, workLocal, workflow)) {
+        if (!buildParameterFromProperties(properties, workProcessing, workflow)) {
             return workflow.fail();
         }
 
@@ -52,7 +44,7 @@ class LoadConfigWork implements Work {
     }
 
     // TO-REMOVE
-    private boolean buildParameterFromProperties(Map<String, Object> properties, WorkLocal workLocal, Workflow workflow) {
+    private boolean buildParameterFromProperties(Map<String, Object> properties, WorkProcessing workProcessing, Workflow workflow) {
         // TODO
         String dataDirectoryOption = (String) properties.get("data.path");
 
@@ -61,8 +53,8 @@ class LoadConfigWork implements Work {
             boolean isJoinedConfig = (boolean) properties.getOrDefault("data.joined-config", false);
 
             dataDirectory = isJoinedConfig ?
-                    workLocal.parameter(CONFIG_DIRECTORY).resolve(dataDirectory) :
-                    workLocal.parameter(USER_DIRECTORY).resolve(dataDirectory);
+                    workProcessing.parameter(CONFIG_DIRECTORY).resolve(dataDirectory) :
+                    workProcessing.parameter(USER_DIRECTORY).resolve(dataDirectory);
         }
 
         if (!Files.exists(dataDirectory)) {

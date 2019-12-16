@@ -4,33 +4,25 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>org.excellent-cancer</groupId>
+    <parent>
+        <groupId>org.excellent-cancer</groupId>
+        <artifactId>excellent-cancer-dependencies</artifactId>
+        <version>1.0.0</version>
+        <relativePath>../excellent-cancer-dependencies</relativePath>
+    </parent>
+
     <artifactId>collaborative-engine</artifactId>
     <version>1.0.0</version>
 
     <properties>
-        <log4j.version>2.12.1</log4j.version>
-        <java.version>11</java.version>
-        <junit.jupiter.version>5.5.2</junit.jupiter.version>
+        <excellent.pact.version>1.0.0</excellent.pact.version>
     </properties>
-
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>org.apache.logging.log4j</groupId>
-                <artifactId>log4j-bom</artifactId>
-                <version>${log4j.version}</version>
-                <scope>import</scope>
-                <type>pom</type>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
 
     <dependencies>
         <dependency>
-            <groupId>org.yaml</groupId>
-            <artifactId>snakeyaml</artifactId>
-            <version>1.25</version>
+            <groupId>org.excellent-cancer</groupId>
+            <artifactId>pact-core</artifactId>
+            <version>${excellent.pact.version}</version>
         </dependency>
         <dependency>
             <groupId>org.jetbrains</groupId>
@@ -39,9 +31,9 @@
             <scope>compile</scope>
         </dependency>
         <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-api</artifactId>
-        </dependency>
+        <groupId>org.apache.logging.log4j</groupId>
+        <artifactId>log4j-api</artifactId>
+    </dependency>
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-core</artifactId>
@@ -49,8 +41,15 @@
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
-            <version>${junit.jupiter.version}</version>
             <scope>test</scope>
+        </dependency>
+
+        <!--  template dependencies  -->
+
+        <dependency>
+            <groupId>org.yaml</groupId>
+            <artifactId>snakeyaml</artifactId>
+            <version>1.25</version>
         </dependency>
     </dependencies>
 
@@ -59,10 +58,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.8.0</version>
-                <configuration>
-                    <release>${java.version}</release>
-                </configuration>
             </plugin>
         </plugins>
     </build>
