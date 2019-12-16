@@ -1,6 +1,6 @@
 package collaborative.engine;
 
-import collaborative.engine.parameterization.Parameter;
+import collaborative.engine.parameterize.Parameter;
 
 import java.nio.file.Path;
 

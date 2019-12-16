@@ -1,4 +1,4 @@
-package collaborative.engine.parameterization;
+package collaborative.engine.parameterize;
 
 public class DotParameterSeries implements ParameterSeries {
 
@@ -10,10 +10,20 @@ public class DotParameterSeries implements ParameterSeries {
 
     @Override
     public <T> Parameter<T> make(String name) {
-        return new DotParameter<>();
+        return new DotParameter<>(prefix + "." + name);
     }
 
     private static class DotParameter<T> implements Parameter<T> {
 
+        private final String keyName;
+
+        public DotParameter(String keyName) {
+            this.keyName = keyName;
+        }
+
+        @Override
+        public String name() {
+            return keyName;
+        }
     }
 }

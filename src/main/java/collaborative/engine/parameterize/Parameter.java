@@ -1,14 +1,16 @@
-package collaborative.engine.parameterization;
+package collaborative.engine.parameterize;
 
 /**
  * @author XyParaCrim
  */
 public interface Parameter<T> {
+    @SuppressWarnings("unchecked")
     default T get(ParameterVariables variables) {
-        return null;
+        return (T) variables.get(name());
     }
 
-    default void set(ParameterVariables variables) {
+    default void set(ParameterVariables variables, T value) {
+        variables.put(name(), value);
     }
 
     default T defaultValue() {

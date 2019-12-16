@@ -1,4 +1,4 @@
-package collaborative.engine.parameterization;
+package collaborative.engine.parameterize;
 
 public final class ParameterSupport {
 

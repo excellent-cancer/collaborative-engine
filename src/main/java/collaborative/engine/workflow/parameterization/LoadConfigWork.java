@@ -1,4 +1,4 @@
-package collaborative.engine.workflow.parameterize;
+package collaborative.engine.workflow.parameterization;
 
 import collaborative.engine.content.ContentSupport;
 import collaborative.engine.workflow.Work;
@@ -31,7 +31,7 @@ class LoadConfigWork implements Work.UncheckedWork {
         try {
             properties = ContentSupport.loadYaml(collaborativeYaml);
         } catch (IOException e) {
-            LOGGER.error("failed to load collaborative.yaml from {}", collaborativeYaml.toAbsolutePath());
+            LOGGER.error("failed to load collaborative.yaml from {}", collaborativeYaml);
             return workflow.fail(e);
         }
 
@@ -45,28 +45,34 @@ class LoadConfigWork implements Work.UncheckedWork {
 
     // TO-REMOVE
     private boolean buildParameterFromProperties(Map<String, Object> properties, WorkProcessing workProcessing, Workflow workflow) {
-        // TODO
-        String dataDirectoryOption = (String) properties.get("data.path");
 
-        Path dataDirectory = Paths.get(dataDirectoryOption);
-        if (!dataDirectory.isAbsolute()) {
-            boolean isJoinedConfig = (boolean) properties.getOrDefault("data.joined-config", false);
+        try {
+            // TODO
+            String dataDirectoryOption = (String) properties.get("data.path");
 
-            dataDirectory = isJoinedConfig ?
-                    workProcessing.parameter(CONFIG_DIRECTORY).resolve(dataDirectory) :
-                    workProcessing.parameter(USER_DIRECTORY).resolve(dataDirectory);
-        }
+            Path dataDirectory = Paths.get(dataDirectoryOption);
+            if (!dataDirectory.isAbsolute()) {
+                boolean isJoinedConfig = (boolean) properties.getOrDefault("data.joined-config", false);
 
-        if (!Files.exists(dataDirectory)) {
-            try {
-                Files.createDirectory(dataDirectory);
-            } catch (IOException e) {
-                LOGGER.error("fail to create directory({}).", dataDirectory);
-                workflow.fail(e);
-                return false;
+                dataDirectory = isJoinedConfig ?
+                        workProcessing.parameter(CONFIG_DIRECTORY).resolve(dataDirectory) :
+                        workProcessing.parameter(USER_DIRECTORY).resolve(dataDirectory);
             }
-        }
 
-        return true;
+            if (!Files.exists(dataDirectory)) {
+                try {
+                    Files.createDirectory(dataDirectory);
+                } catch (IOException e) {
+                    LOGGER.error("fail to create directory({}).", dataDirectory);
+                    workflow.fail(e);
+                    return false;
+                }
+            }
+
+            return true;
+        } catch (Exception e) {
+            workflow.fail(e);
+            return false;
+        }
     }
 }

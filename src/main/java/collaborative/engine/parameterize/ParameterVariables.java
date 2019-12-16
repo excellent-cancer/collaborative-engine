@@ -1,4 +1,4 @@
-package collaborative.engine.parameterization;
+package collaborative.engine.parameterize;
 
 import java.util.Properties;
 

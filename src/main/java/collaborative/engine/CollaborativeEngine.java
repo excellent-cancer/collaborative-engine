@@ -2,7 +2,7 @@ package collaborative.engine;
 
 import collaborative.engine.workflow.Workflow;
 import collaborative.engine.workflow.WorkflowFactory;
-import collaborative.engine.workflow.parameterize.ConfigDirectoryWork;
+import collaborative.engine.workflow.parameterization.ConfigDirectoryWork;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import pact.component.lifecycle.LifecycleFactory;

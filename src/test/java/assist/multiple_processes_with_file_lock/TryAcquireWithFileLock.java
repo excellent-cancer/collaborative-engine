@@ -1,4 +1,4 @@
-package assist.MultipleProcessesWithFileLock;
+package assist.multiple_processes_with_file_lock;
 
 import assist.support.ConsoleSupport;
 import assist.support.ControlSupport;
@@ -9,7 +9,7 @@ import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
 import java.nio.file.Path;
 
-import static assist.MultipleProcessesWithFileLock.FileLockConfig.EXCLUSIVE_NAME;
+import static assist.multiple_processes_with_file_lock.FileLockConfig.EXCLUSIVE_NAME;
 import static java.nio.file.StandardOpenOption.WRITE;
 
 /**

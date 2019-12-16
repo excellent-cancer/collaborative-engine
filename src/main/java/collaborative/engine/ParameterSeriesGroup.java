@@ -1,7 +1,7 @@
 package collaborative.engine;
 
-import collaborative.engine.parameterization.ParameterSeries;
-import collaborative.engine.parameterization.ParameterSupport;
+import collaborative.engine.parameterize.ParameterSeries;
+import collaborative.engine.parameterize.ParameterSupport;
 
 /**
  * Defines the properties of converted by config files.

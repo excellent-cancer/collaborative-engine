@@ -1,7 +1,7 @@
 package collaborative.engine.workflow;
 
-import collaborative.engine.parameterization.Parameter;
-import collaborative.engine.parameterization.ParameterVariables;
+import collaborative.engine.parameterize.Parameter;
+import collaborative.engine.parameterize.ParameterVariables;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import pact.etc.ConfigureCheckProcessing;
@@ -42,10 +42,11 @@ public class WorkProcessing implements ConfigureCheckProcessing {
     }
 
     public <T> boolean setParameterIfAbsent(Parameter<T> parameter, T value) {
-        return false;
+        parameter.set(parameterStore, value);
+        return true;
     }
 
     public <T> void setParameter(Parameter<T> parameter, T value) {
-
+        parameter.set(parameterStore, value);
     }
 }
