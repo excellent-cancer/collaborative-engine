@@ -7,6 +7,9 @@ import java.io.IOException;
 import java.io.Reader;
 import java.util.Objects;
 
+/**
+ * @author XyParaCrim
+ */
 public class YamlReader implements ContentReader {
 
     private final Reader sourceReader;
@@ -51,7 +54,8 @@ public class YamlReader implements ContentReader {
         }
     }
 
-    public boolean isEof() {
+    @Override
+    public boolean isEOF() {
         return eof;
     }
 

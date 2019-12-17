@@ -1,8 +1,8 @@
 package collaborative.engine.content.yaml;
 
 
-import collaborative.engine.content.common.LineColumn;
 import collaborative.engine.content.core.ContentScanner;
+import collaborative.engine.content.core.Token;
 
 import java.io.Reader;
 import java.util.LinkedList;
@@ -29,11 +29,22 @@ public class YamlScanner implements ContentScanner {
     /** Store scanned multiple tokens. */
     private LinkedList<Token> scanned;
 
-    public YamlScanner(Reader reader) {
-        this.line = 0;
+    /**
+     * lexical scanner for yaml file.During the scanning process,
+     * Yaml's words pop up to record the scanning position.
+     *
+     * @param source source of yaml file
+     */
+    public YamlScanner(Reader source) {
         this.column = 0;
         this.scanned = new LinkedList<>();
-        this.yamlReader = YamlReader.newYamlReader(reader);
+        this.yamlReader = YamlReader.newYamlReader(source);
+        if (this.yamlReader.isEOF()) {
+            this.line = 0;
+            scanned.push(YamlToken.EOF());
+        } else {
+            this.line = 1;
+        }
     }
 
     @Override
@@ -55,9 +66,10 @@ public class YamlScanner implements ContentScanner {
     public void scan() {
         // 一些scan操作会连续读入多个token
         if (scanned.isEmpty()) {
+            // in this step, the current char can't be EOF.
             yamlReader.readChar();
             if (scanSpaceOrLine() &&
-                    scanEof() &&
+                    scanEOF() &&
                     scanComment()) {
                 scanProperty();
             }
@@ -71,12 +83,23 @@ public class YamlScanner implements ContentScanner {
     /**
      * Scan spaceWhite and line terminator and skip it.But it's
      * always true, because does not scan eof.
+     *
      * @return whether to scan for new tokens including EOF.
      */
     private boolean scanSpaceOrLine() {
-        while (yamlReader.isWhiteSpace() ||
-                yamlReader.isLineTerminator(true)) {
-            yamlReader.readChar();
+        while (true) {
+            if (yamlReader.isWhiteSpace()) {
+                column++;
+                yamlReader.readChar();
+                continue;
+            }
+            if (yamlReader.isLineTerminator(true)) {
+                column = 0;
+                line++;
+                yamlReader.readChar();
+                continue;
+            }
+            break;
         }
 
         return true;
@@ -84,29 +107,37 @@ public class YamlScanner implements ContentScanner {
 
     /**
      * Scan yaml comment content and skip it.
+     *
      * @return whether to scan for new tokens including EOF.
      */
     private boolean scanComment() {
-        if (yamlReader.isCommentSign()) {
+        if (yamlReader.current(YamlTokenizer.COMMENT_SIGN)) {
             do {
+                column++;
                 yamlReader.readChar();
                 if (yamlReader.isLineTerminator(true)) {
                     line++;
-                    token = Token.comment();
+                    column = 0;
+                    token = YamlToken.comment();
                     return false;
                 }
-            } while (!yamlReader.isEof());
+            } while (!yamlReader.isEOF());
 
-            token = Token.eof();
+            token = YamlToken.EOF();
             return false;
         }
 
         return true;
     }
 
-    private boolean scanEof() {
-        if (yamlReader.isEof()) {
-            token = Token.eof();
+    /**
+     *
+     *
+     * @return whether to scan for new tokens including EOF.
+     */
+    private boolean scanEOF() {
+        if (yamlReader.isEOF()) {
+            token = YamlToken.EOF();
             return false;
         }
         return true;
@@ -118,34 +149,40 @@ public class YamlScanner implements ContentScanner {
         }
 
         StringBuilder str = new StringBuilder();
-
         do {
             str.append(yamlReader.current());
+            column++;
             yamlReader.readChar();
-        } while (!yamlReader.isEof() && !yamlReader.isSplitCharater());
+        } while (!yamlReader.isEOF() && !yamlReader.isSplitCharater() && !yamlReader.isLineTerminator());
 
         if (!yamlReader.isSplitCharater()) {
             throw new YamlReaderException();
+        } else {
+            column++;
+            yamlReader.readChar();
         }
 
-        scanned.push(Token.key(str.toString()));
+        scanned.push(YamlToken.key(str.toString()));
 
         // scan value
-        while (yamlReader.isWhiteSpace() && !yamlReader.isEof()) {
+        while (yamlReader.isWhiteSpace() && !yamlReader.isEOF()) {
+            column++;
             yamlReader.readChar();
         }
 
         if (yamlReader.isLetterOrDigit()) {
             str = new StringBuilder();
-            str.append(yamlReader.current());
-
-            while (!yamlReader.isEof()) {
+            do {
+                str.append(yamlReader.current());
+                column++;
                 yamlReader.readChar();
+
                 if (yamlReader.isLineTerminator(true)) {
+                    column = 0;
+                    line++;
                     break;
                 }
-                str.append(yamlReader.current());
-            }
+            } while (!yamlReader.isEOF());
         } else {
             throw new YamlReaderException();
         }

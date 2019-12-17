@@ -1,8 +1,10 @@
 package collaborative.engine.content.core;
 
 import collaborative.engine.content.common.LineColumn;
-import collaborative.engine.content.yaml.Token;
 
+/**
+ * @author XyParaCrim
+ */
 public interface ContentScanner {
 
     int currentLine();
