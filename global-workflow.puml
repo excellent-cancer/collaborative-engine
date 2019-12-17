@@ -1,0 +1,11 @@
+@startuml
+hide empty description
+
+state GlobalWorkflow {
+  [*] -d--> Parameterization
+  Parameterization -down--> Routinization
+  Routinization -down--> Normalization
+  Normalization -down--> [*]: TODO
+}
+
+@enduml
