@@ -46,14 +46,6 @@ public interface ContentReader {
         }
     }
 
-    default boolean isCommentSign() {
-        return current() == '#';
-    }
-
-    default boolean isSplitCharater() {
-        return current() == ':';
-    }
-
     default boolean isWhiteSpace() {
         return Character.isWhitespace(current());
     }

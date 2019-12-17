@@ -131,7 +131,7 @@ public class YamlScanner implements ContentScanner {
     }
 
     /**
-     *
+     * Scan if the current character has ended.
      *
      * @return whether to scan for new tokens including EOF.
      */
@@ -143,6 +143,9 @@ public class YamlScanner implements ContentScanner {
         return true;
     }
 
+    /**
+     * Scans a property, including a key and a value.
+     */
     private void scanProperty() {
         if (!yamlReader.isLetterOrDigit()) {
             throw new YamlReaderException();
@@ -153,9 +156,9 @@ public class YamlScanner implements ContentScanner {
             str.append(yamlReader.current());
             column++;
             yamlReader.readChar();
-        } while (!yamlReader.isEOF() && !yamlReader.isSplitCharater() && !yamlReader.isLineTerminator());
+        } while (!yamlReader.isEOF() && !yamlReader.current(YamlTokenizer.SPLIT_CHARATER) && !yamlReader.isLineTerminator());
 
-        if (!yamlReader.isSplitCharater()) {
+        if (!yamlReader.current(YamlTokenizer.SPLIT_CHARATER)) {
             throw new YamlReaderException();
         } else {
             column++;
