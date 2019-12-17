@@ -8,6 +8,9 @@ import java.nio.file.Path;
 import java.util.Collections;
 import java.util.Map;
 
+/**
+ * @author XyParaCrim
+ */
 public final class ContentSupport {
 
     // TO-REMOVE
@@ -15,4 +18,6 @@ public final class ContentSupport {
         Map<String, Object> properties = new Yaml().load(Files.newBufferedReader(path));
         return properties != null ? properties : Collections.emptyMap();
     }
+
+
 }
