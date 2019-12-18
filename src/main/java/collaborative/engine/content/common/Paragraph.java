@@ -19,11 +19,11 @@ public class Paragraph {
         this.end = end;
     }
 
-    public LineColumn startLineColumn() {
+    public LineColumn start() {
         return start;
     }
 
-    public LineColumn endLineColumn() {
+    public LineColumn end() {
         return end;
     }
 

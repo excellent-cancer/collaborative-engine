@@ -171,54 +171,94 @@ public class YamlScanner implements ContentScanner {
      * is missing, and will throw runtime exception.
      */
     private void scanProperty() {
-        if (!yamlReader.isLetterOrDigit()) {
-            throw new YamlLexException();
+        int startLine = line;
+        int startColumn = column + 1;
+        boolean afterItem = false;
+
+        // At this step, the current character must not be a comment, whiteSpace, or EOF.
+        while (yamlReader.current(YamlTokenizer.ITEM_SIGN)) {
+            scanChar();
+            if (yamlReader.isWhiteSpace()) {
+                scanItem();
+                scanChar();
+            } else if (yamlReader.isEOF() || yamlReader.isLineTerminator(true)) {
+                scanError();
+                return;
+            } else {
+                // if the character immediately following - is not whiteSpace,
+                // it means that it is not an array item, but a literal
+                // that starts with -
+                afterItem = true;
+                startColumn = column;
+                break;
+            }
         }
 
         StringBuilder str = new StringBuilder();
-        int startLine = currentLine();
-        int startColumn = currentColumn() + 1;
+        if (afterItem) {
+            // a literal that starts with -
+            str.append(YamlTokenizer.ITEM_SIGN);
+        }
+
+        // scan forward until it encounter a :, and : followed by
+        // a white space. Scans for errors if it was not encountered
+        // until the next line or EOF
         do {
             str.append(yamlReader.current());
             scanChar();
-        } while (!yamlReader.isEOF() && !yamlReader.current(YamlTokenizer.SPLIT_CHARATER) && !yamlReader.isLineTerminator());
+            if (!scanMore()) {
+                return;
+            }
+        } while (scanSplit());
 
-        if (yamlReader.current(YamlTokenizer.SPLIT_CHARATER)) {
-            // got a token which is key's literal
-            token = YamlToken.literal(from(startLine, startColumn), str.toString());
-            scanned.push(token);
-            // advance one character
-            // and for preciseness, push split token to scanned list
-            scanChar();
-            scanSplit();
-        } else {
-            scanError();
-            return;
-        }
+        // got a token which is key's literal
+        // push literal token
+        token = YamlToken.literal(
+                from(startLine, startColumn, token.paragraph.start().previousColumn()),
+                str.toString()
+        );
+        scanned.push(token);
 
-        // scan value
-        while (yamlReader.isWhiteSpace() && !yamlReader.isEOF()) {
-            scanChar();
-        }
+        scanValue();
+    }
 
-        if (yamlReader.isLetterOrDigit()) {
-            str = new StringBuilder();
-            startLine = currentLine();
-            startColumn = currentColumn() + 1;
-            do {
-                str.append(yamlReader.current());
-                scanChar();
+    /**
+     * Scan the entire line of literal after the split token
+     */
+    private void scanValue() {
+        // scan the whole line
+        int startLine = line;
+        int startColumn = column + 1;
 
-                if (yamlReader.isLineTerminator(true)) {
-                    token = YamlToken.literal(from(startLine, startColumn), str.toString());
-                    scanned.push(token);
-                    // scan the next line but current line-column still at the end of the previous line
-                    scanNextLine();
-                    break;
+        int whiteSpaceSize = 0;
+        int literalSize = 0;
+
+        StringBuilder literal = new StringBuilder();
+
+        while (!(yamlReader.isLineTerminator(true) && yamlReader.isEOF())) {
+            if (yamlReader.isWhiteSpace()) {
+                if (literalSize > 0) {
+                    whiteSpaceSize++;
                 }
-            } while (!yamlReader.isEOF());
+            } else {
+                if (whiteSpaceSize > 0) {
+                    repeatWhiteSpace(literal, whiteSpaceSize);
+                    whiteSpaceSize = 0;
+                }
+                literalSize++;
+                literal.append(yamlReader.current());
+            }
+            scanChar();
+        }
+
+        token = YamlToken.literal(from(startLine, startColumn), literal.toString());
+        scanned.push(token);
+
+        if (yamlReader.isEOF()) {
+            scanEOF();
         } else {
-            scanError();
+            // scan the next line but current line-column still at the end of the previous line
+            scanNextLine();
         }
     }
 
@@ -234,10 +274,24 @@ public class YamlScanner implements ContentScanner {
 
     /**
      * Scan an split token into the scanned token list.
+     *
+     * @return whether to scan to the separator
      */
-    private void scanSplit() {
-        token = YamlToken.split(from());
-        scanned.push(token);
+    private boolean scanSplit() {
+        if (yamlReader.current(YamlTokenizer.SPLIT_SIGN)) {
+            scanChar();
+            if (yamlReader.isWhiteSpace()) {
+                // advance one character
+                scanChar();
+                // and for preciseness, push split token to scanned list
+                token = YamlToken.split(from(line, column - 2));
+                scanned.push(token);
+
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -264,6 +318,14 @@ public class YamlScanner implements ContentScanner {
         column = 0;
     }
 
+    private boolean scanMore() {
+        if (yamlReader.isEOF() || yamlReader.isLineTerminator()) {
+            scanError();
+            return false;
+        }
+        return true;
+    }
+
     // Utils function
 
     private Paragraph from(LineColumn startLineColumn) {
@@ -274,7 +336,17 @@ public class YamlScanner implements ContentScanner {
         return Paragraph.of(LineColumn.of(line, column), lineColumn());
     }
 
+    private Paragraph from(int line, int column, LineColumn endLineColumn) {
+        return Paragraph.of(LineColumn.of(line, column), endLineColumn);
+    }
+
     private Paragraph from() {
         return Paragraph.identical(lineColumn());
+    }
+
+    private void repeatWhiteSpace(StringBuilder builder, int count) {
+        while (count-- > 0) {
+            builder.append(' ');
+        }
     }
 }
