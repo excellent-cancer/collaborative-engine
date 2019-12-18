@@ -5,12 +5,12 @@ import java.io.IOException;
 /**
  * @author XyParaCrim
  */
-public class YamlReaderException extends RuntimeException {
-    public YamlReaderException(IOException e) {
+public class YamlLexException extends RuntimeException {
+    public YamlLexException(IOException e) {
         super(e);
     }
 
-    public YamlReaderException() {
+    public YamlLexException() {
         super();
     }
 }

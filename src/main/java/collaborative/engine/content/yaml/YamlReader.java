@@ -34,7 +34,7 @@ public class YamlReader implements ContentReader {
             try {
                 count = sourceReader.read(buffer);
             } catch (IOException e) {
-                throw new YamlReaderException(e);
+                throw new YamlLexException(e);
             }
 
             if (count > 0) {

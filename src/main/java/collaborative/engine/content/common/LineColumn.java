@@ -22,6 +22,10 @@ public class LineColumn implements Comparable<LineColumn> {
         return compared != 0 ? Integer.compare(column, o.column) : compared;
     }
 
+    public LineColumn copy() {
+        return new LineColumn(line, column);
+    }
+
     public static LineColumn ofIndex(int lineIndex, int columnIndex) {
         return new LineColumn(lineIndex + 1, columnIndex + 1);
     }
