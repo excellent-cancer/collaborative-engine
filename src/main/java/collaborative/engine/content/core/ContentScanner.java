@@ -15,6 +15,8 @@ public interface ContentScanner {
 
     void scan();
 
+    boolean scannable();
+
     default LineColumn lineColumn() {
         return LineColumn.of(currentLine(), currentColumn());
     }

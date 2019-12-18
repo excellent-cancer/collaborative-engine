@@ -11,17 +11,16 @@ import pact.annotation.DataStruct;
 @DataStruct
 public class YamlToken extends Token {
 
-    public final String content;
+    public static final YamlToken DUMMY = new YamlToken(Paragraph.identical(LineColumn.ORIGIN), YamlTokenKind.DUMMY);
 
-    public final YamlTokenKind yamlTokenKind;
+    public final String content;
 
     private YamlToken(Paragraph paragraph, YamlTokenKind kind) {
         this(paragraph, kind, null);
     }
 
     private YamlToken(Paragraph paragraph, YamlTokenKind kind, String content) {
-        super(paragraph);
-        this.yamlTokenKind = kind;
+        super(paragraph, kind);
         this.content = content;
     }
 
@@ -57,10 +56,14 @@ public class YamlToken extends Token {
 
     /**
      * This enum defines partial token used by the Yaml scanner. Similar
-     * to {@link Tokens#TokenKind} from sun-tools.
+     * to Token#TokenKind from sun-tools.
      */
     @DataStruct
-    enum YamlTokenKind {
+    public enum YamlTokenKind implements TokenKind {
+        /**
+         * virtual token or origin line-column
+         */
+        DUMMY(),
         /**
          * end of yaml content
          */

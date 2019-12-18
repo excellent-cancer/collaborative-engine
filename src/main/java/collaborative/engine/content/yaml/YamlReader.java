@@ -25,10 +25,16 @@ public class YamlReader implements ContentReader {
     private boolean eof = false;
 
     private YamlReader(Reader sourceReader) {
-        this.sourceReader = Objects.requireNonNull(sourceReader);
+        this.sourceReader = Objects.requireNonNull(sourceReader, "require Reader to reader yaml's file");
     }
 
+    /**
+     * Try to read chars to buffer from {@code sourceReader reader}.
+     *
+     * @return whether to read characters into buffer
+     */
     public boolean read() {
+        boolean isReadToBuffer = false;
         if (!eof) {
             int count;
             try {
@@ -40,11 +46,13 @@ public class YamlReader implements ContentReader {
             if (count > 0) {
                 index = 0;
                 limit = count;
+                isReadToBuffer = true;
+            } else {
                 eof = true;
             }
         }
 
-        return eof;
+        return isReadToBuffer;
     }
 
     @Override

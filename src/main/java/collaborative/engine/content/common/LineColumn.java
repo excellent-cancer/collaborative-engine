@@ -38,5 +38,5 @@ public class LineColumn implements Comparable<LineColumn> {
         return new LineColumn(line, column);
     }
 
-    public static final LineColumn DUMMY = new LineColumn(0, 0);
+    public static final LineColumn ORIGIN = new LineColumn(0, 0);
 }
