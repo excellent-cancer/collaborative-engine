@@ -5,9 +5,12 @@ import collaborative.engine.content.common.LineColumn;
 import collaborative.engine.content.common.Paragraph;
 import collaborative.engine.content.core.ContentScanner;
 import collaborative.engine.content.core.Token;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.Reader;
 import java.util.LinkedList;
+import java.util.UUID;
 
 /**
  * Built-in lexical analyzer for yaml file to avoid to use
@@ -17,6 +20,13 @@ import java.util.LinkedList;
  */
 @SuppressWarnings("unused")
 public class YamlScanner implements ContentScanner {
+
+    private static final Logger LOGGER = LogManager.getLogger(YamlScanner.class);
+
+    /**
+     * To identify the scanning process.
+     */
+    private final String scanId = UUID.randomUUID().toString().substring(0, 8);
 
     /**
      * Delegate reader to yamlReader
@@ -60,11 +70,12 @@ public class YamlScanner implements ContentScanner {
         this.token = YamlToken.DUMMY;
         this.yamlReader = YamlReader.newYamlReader(source);
         // fix scan(): the number of lines does not increase
+        reportTrace("create yaml scanner");
         if (this.yamlReader.read()) {
             this.line = 1;
         } else {
             this.line = 0;
-            scanned.push(YamlToken.EOF(lineColumn()));
+            saveEOFToken();
         }
     }
 
@@ -120,6 +131,7 @@ public class YamlScanner implements ContentScanner {
         while (true) {
             if (yamlReader.isWhiteSpace()) {
                 scanChar();
+                reportTrace("skip white space");
                 continue;
             }
             if (yamlReader.isLineTerminator(true)) {
@@ -148,13 +160,13 @@ public class YamlScanner implements ContentScanner {
                 column++;
                 yamlReader.readChar();
                 if (yamlReader.isLineTerminator(true)) {
-                    scanned.push(YamlToken.comment(from(startColumn, startColumn)));
+                    saveCommentToken(startLine, startColumn);
                     scanNextLine();
                     return false;
                 }
                 if (yamlReader.isEOF()) {
-                    scanned.push(YamlToken.comment(from(startColumn, startColumn)));
-                    scanEOF();
+                    saveCommentToken(startLine, startColumn);
+                    saveEOFToken();
                     return false;
                 }
             } while (true);
@@ -171,7 +183,7 @@ public class YamlScanner implements ContentScanner {
     @SuppressWarnings("AlibabaLowerCamelCaseVariableNaming")
     private boolean scanEOF() {
         if (yamlReader.isEOF()) {
-            scanned.push(YamlToken.EOF(lineColumn()));
+            saveEOFToken();
             return false;
         }
         return true;
@@ -246,8 +258,10 @@ public class YamlScanner implements ContentScanner {
                     str.toString()
             );
             scanned.push(literalToken);
+            reportTraceAndContent(literalToken, "literal token");
             // and for preciseness, push split token to scanned list
             scanned.push(splitToken);
+            reportTrace(splitToken, "split token");
 
             scanValue();
         }
@@ -283,7 +297,9 @@ public class YamlScanner implements ContentScanner {
             scanChar();
         }
 
-        scanned.push(YamlToken.literal(from(startLine, startColumn), literal.toString()));
+        YamlToken token = YamlToken.literal(from(startLine, startColumn), literal.toString());
+        scanned.push(token);
+        reportTraceAndContent(token, "literal token");
 
         if (yamlReader.isEOF()) {
             scanEOF();
@@ -299,6 +315,7 @@ public class YamlScanner implements ContentScanner {
      */
     private void scanError() {
         scanned.push(YamlToken.error(from()));
+        reportTrace(token, "error token");
     }
 
     /**
@@ -325,7 +342,9 @@ public class YamlScanner implements ContentScanner {
      * Scan an item token into the scanned token list.
      */
     private void scanItem() {
-        scanned.push(YamlToken.item(from()));
+        YamlToken token = YamlToken.item(from());
+        scanned.push(token);
+        reportTrace(token, "item token");
     }
 
     /**
@@ -342,6 +361,7 @@ public class YamlScanner implements ContentScanner {
     private void scanNextLine() {
         line++;
         column = 0;
+        reportTrace("next line");
     }
 
     private boolean scanMore() {
@@ -374,5 +394,32 @@ public class YamlScanner implements ContentScanner {
         while (count-- > 0) {
             builder.append(' ');
         }
+    }
+
+    private void reportTrace(String message) {
+        LOGGER.trace("[{}][{}:{}] {}", scanId, currentLine(), currentColumn(), message);
+    }
+
+    private void reportTrace(Token token, String message) {
+        LineColumn start = token.paragraph.start();
+        LineColumn end = token.paragraph.end();
+        LOGGER.trace("[{}][{}:{}-{}:{}] {}", scanId, start.line, start.column, end.line, end.column, message);
+    }
+
+    private void reportTraceAndContent(Token token, String message) {
+        LineColumn start = token.paragraph.start();
+        LineColumn end = token.paragraph.end();
+        LOGGER.debug("[{}][{}:{}-{}:{}] {}: \"{}\"", scanId, start.line, start.column, end.line, end.column, message, token.content);
+    }
+
+    private void saveCommentToken(int line, int column) {
+        YamlToken commentToken = YamlToken.comment(from(line, column));
+        scanned.push(commentToken);
+        reportTrace(commentToken, "comment token");
+    }
+
+    private void saveEOFToken() {
+        scanned.push(YamlToken.EOF(lineColumn()));
+        reportTrace("EOF Token");
     }
 }
