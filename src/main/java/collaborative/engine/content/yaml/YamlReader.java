@@ -1,6 +1,6 @@
 package collaborative.engine.content.yaml;
 
-import collaborative.engine.BufferSupport;
+import pact.support.BufferSupport;
 import collaborative.engine.content.core.ContentReader;
 
 import java.io.IOException;

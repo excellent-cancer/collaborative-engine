@@ -32,11 +32,15 @@ public class YamlToken extends Token {
     }
 
     public static YamlToken comment(Paragraph paragraph) {
-        return new YamlToken(paragraph, YamlTokenKind.COMMENT);
+        return new YamlToken(paragraph, YamlTokenKind.COMMENT, YamlTokenKind.COMMENT.name);
     }
 
     public static YamlToken literal(Paragraph paragraph, String content) {
         return new YamlToken(paragraph, YamlTokenKind.LITERAL, content);
+    }
+
+    public static YamlToken named(Paragraph paragraph, String content) {
+        return new YamlToken(paragraph, YamlTokenKind.NAMED, content);
     }
 
     public static YamlToken error(Paragraph paragraph) {
@@ -44,11 +48,11 @@ public class YamlToken extends Token {
     }
 
     public static YamlToken split(Paragraph paragraph) {
-        return new YamlToken(paragraph, YamlTokenKind.SPLIT);
+        return new YamlToken(paragraph, YamlTokenKind.SPLIT, YamlTokenKind.SPLIT.name);
     }
 
     public static YamlToken item(Paragraph paragraph) {
-        return new YamlToken(paragraph, YamlTokenKind.ITEM);
+        return new YamlToken(paragraph, YamlTokenKind.ITEM, YamlTokenKind.ITEM.name);
     }
 
     /**
@@ -72,13 +76,17 @@ public class YamlToken extends Token {
         /**
          * line comment
          */
-        COMMENT(),
+        COMMENT("#"),
+        /**
+         * key delimiter
+         */
+        NAMED(),
         /**
          * consecutive reasonable strings in text
          */
         LITERAL(),
         /**
-         * key and value delimiters
+         * value delimiter
          */
         SPLIT(":"),
         /**

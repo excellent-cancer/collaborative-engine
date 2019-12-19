@@ -34,16 +34,6 @@ public class YamlScanner implements ContentScanner {
     private final YamlReader yamlReader;
 
     /**
-     * Number of lines currently scanned to position.
-     */
-    private int line;
-
-    /**
-     * Number of columns currently scanned to position.
-     */
-    private int column;
-
-    /**
      * The current scanned token.
      */
     private Token token;
@@ -51,7 +41,12 @@ public class YamlScanner implements ContentScanner {
     /**
      * Store scanned multiple tokens.
      */
-    private LinkedList<Token> scanned;
+    LinkedList<Token> scanned;
+
+    /**
+     * Record scan locations and generate tokens.
+     */
+    private ScanYamlTracker tracker;
 
     /**
      * Indicates whether scanning can continue. If false, scan ended or lexical error.
@@ -65,19 +60,14 @@ public class YamlScanner implements ContentScanner {
      * @param source source of yaml file
      */
     public YamlScanner(Reader source) {
-        this.column = 0;
-        this.scanned = new LinkedList<>();
         this.token = YamlToken.DUMMY;
+        this.scanned = new LinkedList<>();
         this.yamlReader = YamlReader.newYamlReader(source);
-        // fix scan(): the number of lines does not increase
-        reportTrace("create yaml scanner");
-        if (this.yamlReader.read()) {
-            this.line = 1;
-        } else {
-            this.line = 0;
-            saveEOFToken();
-        }
+        this.tracker = new ScanYamlTracker();
+        scanInitialized();
     }
+
+    // Main Export
 
     @Override
     public Token currentToken() {
@@ -86,12 +76,12 @@ public class YamlScanner implements ContentScanner {
 
     @Override
     public int currentLine() {
-        return line;
+        return token.paragraph.end().line;
     }
 
     @Override
     public int currentColumn() {
-        return column;
+        return token.paragraph.end().column;
     }
 
     @Override
@@ -106,11 +96,12 @@ public class YamlScanner implements ContentScanner {
             // some handler of do scanning may scan more than one token.
             if (scanned.isEmpty()) {
                 // in this step, the current char can't be EOF.
-                yamlReader.readChar();
                 if (scanSpaceOrLine() &&
                         scanEOF() &&
-                        scanComment()) {
-                    scanProperty();
+                        scanComment() &&
+                        scanItems() &&
+                        scanNamed()) {
+                    scanValue();
                 }
             }
 
@@ -119,6 +110,17 @@ public class YamlScanner implements ContentScanner {
     }
 
     // Scanner Ultimate
+
+    /**
+     * fix scan(): the number of lines does not increase
+     */
+    private void scanInitialized() {
+        if (yamlReader.read()) {
+            tracker.skipLine();
+        } else {
+            tracker.saveEOFToken();
+        }
+    }
 
     /**
      * Scan spaceWhite and line terminator and skip it.But it's
@@ -130,13 +132,11 @@ public class YamlScanner implements ContentScanner {
     private boolean scanSpaceOrLine() {
         while (true) {
             if (yamlReader.isWhiteSpace()) {
-                scanChar();
-                reportTrace("skip white space");
+                tracker.skipWhiteSpace();
                 continue;
             }
             if (yamlReader.isLineTerminator(true)) {
-                scanNextLine();
-                yamlReader.readChar();
+                tracker.skipLine();
                 continue;
             }
             break;
@@ -153,25 +153,21 @@ public class YamlScanner implements ContentScanner {
      */
     private boolean scanComment() {
         if (yamlReader.current(YamlTokenizer.COMMENT_SIGN)) {
-            int startLine = currentLine();
-            int startColumn = currentColumn() + 1;
+            tracker.markLineColumn();
             do {
-                scanChar();
-                column++;
-                yamlReader.readChar();
+                tracker.skipChar();
                 if (yamlReader.isLineTerminator(true)) {
-                    saveCommentToken(startLine, startColumn);
-                    scanNextLine();
+                    tracker.saveCommentToken();
+                    tracker.skipLine();
                     return false;
                 }
                 if (yamlReader.isEOF()) {
-                    saveCommentToken(startLine, startColumn);
-                    saveEOFToken();
+                    tracker.saveCommentToken();
+                    tracker.saveEOFToken();
                     return false;
                 }
             } while (true);
         }
-
         return true;
     }
 
@@ -183,194 +179,150 @@ public class YamlScanner implements ContentScanner {
     @SuppressWarnings("AlibabaLowerCamelCaseVariableNaming")
     private boolean scanEOF() {
         if (yamlReader.isEOF()) {
-            saveEOFToken();
+            tracker.saveEOFToken();
             return false;
         }
+        return true;
+    }
+
+    /**
+     * Scan if the current character is ITEM_SIGN. If scan it,
+     * it will scan the whole line.
+     *
+     * @return whether to scan for new tokens including EOF.
+     */
+    private boolean scanItems() {
+        if (yamlReader.current(YamlTokenizer.ITEM_SIGN)) {
+            tracker.markLineColumn();
+
+            // At this step, the current character must not be a comment, whiteSpace, or EOF.
+            boolean includeItemSign = false;
+            do {
+                tracker.skipChar();
+                if (yamlReader.isWhiteSpace()) {
+                    tracker.saveItemToken();
+                    tracker.skipChar();
+                    tracker.markLineColumn();
+                } else {
+                    // if the character immediately following - is not whiteSpace,
+                    // it means that it is not an array item, but a literal
+                    // that starts with -
+                    if (scanAnymore()) {
+                        includeItemSign = true;
+                        break;
+                    } else {
+                        return false;
+                    }
+                }
+            } while (yamlReader.current(YamlTokenizer.ITEM_SIGN));
+
+            StringBuilder literal = new StringBuilder();
+            if (includeItemSign) {
+                literal.append(YamlTokenizer.ITEM_SIGN);
+            } else {
+                tracker.skipWhiteSpaceContinuously();
+            }
+
+            while (true) {
+                if (yamlReader.isEOF()) {
+                    tracker.saveLiteralToken(literal.toString().trim());
+                    tracker.saveEOFToken();
+                    return false;
+                }
+
+                if (yamlReader.isLineTerminator(true)) {
+                    tracker.saveLiteralToken(literal.toString().trim());
+                    tracker.skipLine();
+                    return false;
+                }
+
+                if (yamlReader.current(YamlTokenizer.SPLIT_SIGN)) {
+                    tracker.skipChar();
+                    if (yamlReader.isWhiteSpace()) {
+                        tracker.saveNamedToken(literal.toString());
+                        tracker.saveSplitToken();
+                        scanValue();
+                        return false;
+                    }
+                }
+
+                literal.append(yamlReader.current());
+                tracker.skipChar();
+            }
+        }
+
         return true;
     }
 
     /**
      * Scans a property, including a key and a value. If one
      * is missing, and will throw runtime exception.
+     *
+     * @return whether to scan for new tokens including EOF.
      */
-    private void scanProperty() {
-        int startLine = line;
-        int startColumn = column + 1;
-        boolean afterItem = false;
+    private boolean scanNamed() {
+        tracker.markLineColumn();
 
-        // At this step, the current character must not be a comment, whiteSpace, or EOF.
-        while (yamlReader.current(YamlTokenizer.ITEM_SIGN)) {
-            scanChar();
-            if (yamlReader.isWhiteSpace()) {
-                scanItem();
-                scanChar();
-            } else if (yamlReader.isEOF() || yamlReader.isLineTerminator(true)) {
-                scanError();
-                return;
-            } else {
-                // if the character immediately following - is not whiteSpace,
-                // it means that it is not an array item, but a literal
-                // that starts with -
-                afterItem = true;
-                startColumn = column;
-                break;
-            }
-        }
-
-        int whiteSpaceSize = 0;
-        int literalSize = 0;
         StringBuilder str = new StringBuilder();
-        YamlToken splitToken;
-        if (afterItem) {
-            // a literal that starts with -
-            literalSize++;
-            str.append(YamlTokenizer.ITEM_SIGN);
-        }
 
         // scan forward until it encounter a :, and : followed by
         // a white space. Scans for errors if it was not encountered
         // until the next line or EOF
-        do //noinspection DuplicatedCode
-        {
-            // TODO Duplicate code
-            if (yamlReader.isWhiteSpace()) {
-                if (literalSize > 0) {
-                    whiteSpaceSize++;
+        do {
+            str.append(yamlReader.current());
+            tracker.skipChar();
+
+            if (yamlReader.current(YamlTokenizer.SPLIT_SIGN)) {
+                tracker.skipChar();
+                if (yamlReader.isWhiteSpace()) {
+                    tracker.skipChar();
+                    tracker.saveNamedToken(str.toString().trim());
+                    tracker.saveSplitToken();
+                    return true;
                 }
-            } else {
-                if (whiteSpaceSize > 0) {
-                    repeatWhiteSpace(str, whiteSpaceSize);
-                    whiteSpaceSize = 0;
-                    literalSize += whiteSpaceSize;
-                }
-                literalSize++;
-                str.append(yamlReader.current());
+                str.append(YamlTokenizer.SPLIT_SIGN);
             }
+        } while (scanAnymore());
 
-            scanChar();
-        } while ((splitToken = scanSplit()) == null && scanMore());
-
-        if (splitToken != null) {
-            // got a token which is key's literal
-            // push literal token
-            Token literalToken = YamlToken.literal(
-                    from(startLine, startColumn, splitToken.paragraph.start().previousColumn()),
-                    str.toString()
-            );
-            scanned.push(literalToken);
-            reportTraceAndContent(literalToken, "literal token");
-            // and for preciseness, push split token to scanned list
-            scanned.push(splitToken);
-            reportTrace(splitToken, "split token");
-
-            scanValue();
-        }
+        return false;
     }
 
     /**
      * Scan the entire line of literal after the split token
      */
     private void scanValue() {
-        // scan the whole line
-        int startLine = line;
-        int startColumn = column + 1;
-
-        int whiteSpaceSize = 0;
-        int literalSize = 0;
+        // skip previous spaces
+        tracker.skipWhiteSpaceContinuously();
 
         StringBuilder literal = new StringBuilder();
-
-        while (!(yamlReader.isLineTerminator(true) || yamlReader.isEOF())) {
-            if (yamlReader.isWhiteSpace()) {
-                if (literalSize > 0) {
-                    whiteSpaceSize++;
-                }
-            } else {
-                if (whiteSpaceSize > 0) {
-                    repeatWhiteSpace(literal, whiteSpaceSize);
-                    whiteSpaceSize = 0;
-                    literalSize += whiteSpaceSize;
-                }
-                literalSize++;
-                literal.append(yamlReader.current());
-            }
-            scanChar();
-        }
-
-        YamlToken token = YamlToken.literal(from(startLine, startColumn), literal.toString());
-        scanned.push(token);
-        reportTraceAndContent(token, "literal token");
-
-        if (yamlReader.isEOF()) {
-            scanEOF();
-        } else {
+        tracker.markLineColumn();
+        while (true) {
             // scan the next line but current line-column still at the end of the previous line
-            scanNextLine();
-        }
-    }
-
-    /**
-     * Scan an error token into the scanned token list and mark
-     * {@link YamlScanner} as unscannable.
-     */
-    private void scanError() {
-        scanned.push(YamlToken.error(from()));
-        reportTrace(token, "error token");
-    }
-
-    /**
-     * Scan an split token into the scanned token list.
-     *
-     * @return the split token
-     * @special
-     */
-    private YamlToken scanSplit() {
-        if (yamlReader.current(YamlTokenizer.SPLIT_SIGN)) {
-            scanChar();
-            if (yamlReader.isWhiteSpace()) {
-                // advance one character
-                scanChar();
-                // the number of columns points to whitespace char
-                return YamlToken.split(from(line, column - 1));
+            if (yamlReader.isLineTerminator(true)) {
+                tracker.saveLiteralToken(literal.toString().trim());
+                tracker.skipLine();
+                return;
             }
+
+            if (yamlReader.isEOF()) {
+                tracker.saveLiteralToken(literal.toString().trim());
+                tracker.saveEOFToken();
+                return;
+            }
+
+            literal.append(yamlReader.current());
+            tracker.skipChar();
         }
-
-        return null;
     }
 
-    /**
-     * Scan an item token into the scanned token list.
-     */
-    private void scanItem() {
-        YamlToken token = YamlToken.item(from());
-        scanned.push(token);
-        reportTrace(token, "item token");
-    }
-
-    /**
-     * Scan a char, but must confirm the correctness of the current character
-     */
-    private void scanChar() {
-        column++;
-        yamlReader.readChar();
-    }
-
-    /**
-     * Ready to scan next line, but must confirm the current character is line-terminator
-     */
-    private void scanNextLine() {
-        line++;
-        column = 0;
-        reportTrace("next line");
-    }
-
-    private boolean scanMore() {
+    private boolean scanAnymore() {
         if (yamlReader.isEOF() || yamlReader.isLineTerminator()) {
-            scanError();
+            tracker.saveErrorToken();
             return false;
         }
         return true;
     }
+
 
     // Utils function
 
@@ -390,12 +342,6 @@ public class YamlScanner implements ContentScanner {
         return Paragraph.identical(lineColumn());
     }
 
-    private void repeatWhiteSpace(StringBuilder builder, int count) {
-        while (count-- > 0) {
-            builder.append(' ');
-        }
-    }
-
     private void reportTrace(String message) {
         LOGGER.trace("[{}][{}:{}] {}", scanId, currentLine(), currentColumn(), message);
     }
@@ -412,14 +358,103 @@ public class YamlScanner implements ContentScanner {
         LOGGER.debug("[{}][{}:{}-{}:{}] {}: \"{}\"", scanId, start.line, start.column, end.line, end.column, message, token.content);
     }
 
-    private void saveCommentToken(int line, int column) {
-        YamlToken commentToken = YamlToken.comment(from(line, column));
-        scanned.push(commentToken);
-        reportTrace(commentToken, "comment token");
-    }
+    private class ScanYamlTracker {
+        /**
+         * Number of lines currently scanned to position.
+         */
+        int line = 0;
 
-    private void saveEOFToken() {
-        scanned.push(YamlToken.EOF(lineColumn()));
-        reportTrace("EOF Token");
+        /**
+         * Number of columns currently scanned to position.
+         */
+        int column = 0;
+
+        /**
+         * Number of token lines used to record tokens containing continuous content.
+         */
+        int markedLine;
+
+        /**
+         * Number of token columns used to record tokens containing continuous content.
+         */
+        int markedColumn;
+
+        void markLineColumn() {
+            markedLine = line;
+            markedColumn = column + 1;
+        }
+
+        // save token into the scanned token list
+
+        void saveEOFToken() {
+            scanned.push(YamlToken.EOF(Paragraph.identical(line, column)));
+            reportTrace("EOF Token");
+        }
+
+        void saveCommentToken() {
+            LineColumn start = LineColumn.of(markedLine, markedColumn);
+            LineColumn end = LineColumn.of(line, column);
+            YamlToken commentToken = YamlToken.comment(Paragraph.of(start, end));
+            scanned.push(commentToken);
+            reportTrace(commentToken, "comment token");
+        }
+
+        void saveLiteralToken(String content) {
+            LineColumn start = LineColumn.of(markedLine, markedColumn);
+            LineColumn end = LineColumn.of(markedLine, markedColumn + content.length() - 1);
+            YamlToken literalToken = YamlToken.literal(Paragraph.of(start, end), content);
+            scanned.push(literalToken);
+            reportTraceAndContent(literalToken, "literal token");
+        }
+
+        void saveSplitToken() {
+            LineColumn start = LineColumn.of(line, column - 1);
+            LineColumn end = LineColumn.of(line, column);
+            YamlToken splitToken = YamlToken.split(Paragraph.of(start, end));
+            scanned.push(splitToken);
+            reportTraceAndContent(splitToken, "split token");
+        }
+
+        void saveItemToken() {
+            YamlToken itemToken = YamlToken.item(Paragraph.identical(line, column));
+            scanned.push(itemToken);
+            reportTraceAndContent(itemToken, "item token");
+        }
+
+        void saveErrorToken() {
+            scanned.push(YamlToken.error(Paragraph.identical(line, column)));
+            reportTrace("error token");
+        }
+
+        void saveNamedToken(String content) {
+            LineColumn start = LineColumn.of(markedLine, markedColumn);
+            LineColumn end = LineColumn.of(markedLine, markedColumn + content.length() - 1);
+            YamlToken namedToken = YamlToken.named(Paragraph.of(start, end), content);
+            scanned.push(namedToken);
+            reportTraceAndContent(namedToken, "named token");
+        }
+
+        void skipWhiteSpace() {
+            column++;
+            yamlReader.readChar();
+            reportTrace("skip white space");
+        }
+
+        void skipWhiteSpaceContinuously() {
+            while (yamlReader.isWhiteSpace()) {
+                tracker.skipChar();
+            }
+        }
+
+        void skipLine() {
+            line++;
+            column = 0;
+            yamlReader.readChar();
+        }
+
+        void skipChar() {
+            column++;
+            yamlReader.readChar();
+        }
     }
 }

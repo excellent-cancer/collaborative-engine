@@ -19,6 +19,10 @@ public class Paragraph {
         this.end = end;
     }
 
+    private Paragraph(LineColumn same) {
+        this.start = this.end = same;
+    }
+
     public LineColumn start() {
         return start;
     }
@@ -28,7 +32,11 @@ public class Paragraph {
     }
 
     public static Paragraph identical(LineColumn lineColumn) {
-        return new Paragraph(Objects.requireNonNull(lineColumn), lineColumn.copy());
+        return new Paragraph(Objects.requireNonNull(lineColumn));
+    }
+
+    public static Paragraph identical(int line, int column) {
+        return new Paragraph(LineColumn.of(line, column));
     }
 
     public static Paragraph of(LineColumn start, LineColumn end) {

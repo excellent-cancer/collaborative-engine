@@ -44,7 +44,7 @@ public class YamlScannerTest {
         }
 
         protected void testScanKeySplitValue() {
-            testNextTokenKind(YamlToken.YamlTokenKind.LITERAL);
+            testNextTokenKind(YamlToken.YamlTokenKind.NAMED);
             testNextTokenKind(YamlToken.YamlTokenKind.SPLIT);
             testNextTokenKind(YamlToken.YamlTokenKind.LITERAL);
         }
