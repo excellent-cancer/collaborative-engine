@@ -11,13 +11,21 @@ import java.util.Objects;
  */
 @DataStruct
 public class Token {
+
     public final Paragraph paragraph;
 
     public final TokenKind kind;
 
+    public final String content;
+
     public Token(Paragraph paragraph, TokenKind kind) {
-        this.kind = Objects.requireNonNull(kind);
+        this(paragraph, kind, "");
+    }
+
+    public Token(Paragraph paragraph, TokenKind kind, String content) {
         this.paragraph = Objects.requireNonNull(paragraph);
+        this.kind = Objects.requireNonNull(kind);
+        this.content = content;
     }
 
     @Marked

@@ -13,15 +13,12 @@ public class YamlToken extends Token {
 
     public static final YamlToken DUMMY = new YamlToken(Paragraph.identical(LineColumn.ORIGIN), YamlTokenKind.DUMMY);
 
-    public final String content;
-
     private YamlToken(Paragraph paragraph, YamlTokenKind kind) {
-        this(paragraph, kind, null);
+        super(paragraph, kind);
     }
 
     private YamlToken(Paragraph paragraph, YamlTokenKind kind, String content) {
-        super(paragraph, kind);
-        this.content = content;
+        super(paragraph, kind, content);
     }
 
     @SuppressWarnings("AlibabaLowerCamelCaseVariableNaming")

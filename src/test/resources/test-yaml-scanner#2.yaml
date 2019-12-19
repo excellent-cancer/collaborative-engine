@@ -1,6 +1,8 @@
-key1: xvalue
-# tssss
+key: value
+# comment
 
-# sdas
+# comment
 
-#dsadassa sdasdas
+# comment
+
+valueWithWhiteSpcace: aaa aaaa aaaa

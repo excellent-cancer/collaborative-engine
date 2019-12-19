@@ -1,21 +1,66 @@
 package collaborative.engine.content.yaml;
 
 import assist.support.ResourcesSupport;
-import collaborative.engine.content.core.Token;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 
 import java.io.Reader;
 import java.nio.file.Files;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.function.BiConsumer;
-import java.util.function.BiPredicate;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 public class YamlScannerTest {
+
+    @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+    interface YamlScannedDelegator {
+
+        void yamlScanner(YamlScanner yamlScanner);
+
+        String yaml();
+
+        @Test
+        @BeforeAll
+        @DisplayName("generate yaml-scanner")
+        default void testGenerateYamlScanner() {
+            ResourcesSupport.ifPathExists(YamlScannerTest.class, yaml(), path -> {
+                Reader reader = assertDoesNotThrow(() -> Files.newBufferedReader(path));
+                YamlScanner yamlScanner = new YamlScanner(reader);
+                yamlScanner(yamlScanner);
+            });
+        }
+    }
+
+    static abstract class AbstractYamlScannedDelegator implements YamlScannedDelegator {
+
+        YamlScanner yamlScanner;
+
+        @Override
+        public void yamlScanner(YamlScanner yamlScanner) {
+            this.yamlScanner = yamlScanner;
+        }
+
+        protected void testNextTokenKind(YamlToken.YamlTokenKind kind) {
+            yamlScanner.scan();
+            assertEquals(yamlScanner.currentToken().kind, kind);
+        }
+
+        protected void testScanKeySplitValue() {
+            testNextTokenKind(YamlToken.YamlTokenKind.LITERAL);
+            testNextTokenKind(YamlToken.YamlTokenKind.SPLIT);
+            testNextTokenKind(YamlToken.YamlTokenKind.LITERAL);
+        }
+
+        protected void testComments(int lines) {
+            while (lines-- > 0) {
+                testNextTokenKind(YamlToken.YamlTokenKind.COMMENT);
+            }
+        }
+
+        protected void testCurrentContent(String content) {
+            assertEquals(content, yamlScanner.currentToken().content);
+        }
+    }
+
+    // Test cases
 
     @Test
     @DisplayName("null reader")
@@ -23,39 +68,44 @@ public class YamlScannerTest {
         assertThrows(NullPointerException.class, () -> new YamlScanner(null));
     }
 
-    @Test
-    @DisplayName("scan test-yaml-scanner#1.yaml - null content")
-    void scanYamlFileNullContent() {
-        ResourcesSupport.ifPathExists(YamlScannerTest.class, "test-yaml-scanner#1.yaml", path -> {
-            Reader reader = assertDoesNotThrow(() -> Files.newBufferedReader(path));
-            YamlScanner yamlScanner = new YamlScanner(reader);
+    @Nested
+    @DisplayName("test-yaml-scanner#1.yaml")
+    class TestYamlScanner$1 extends AbstractYamlScannedDelegator {
 
-            yamlScanner.scan();
-            assertEquals(yamlScanner.currentToken().kind, YamlToken.YamlTokenKind.EOF);
-        });
+        @Override
+        public String yaml() {
+            return "test-yaml-scanner#1.yaml";
+        }
+
+        @Test
+        void scanYamlFileNullContent() {
+            testNextTokenKind(YamlToken.YamlTokenKind.EOF);
+        }
     }
 
-    @Test
-    @DisplayName("scan test-yaml-scanner#2.yaml - normal lexical")
-    void scanYamlFileNormalLexical() {
-        ResourcesSupport.ifPathExists(YamlScannerTest.class, "test-yaml-scanner#2.yaml", path -> {
-            Reader reader = assertDoesNotThrow(() -> Files.newBufferedReader(path));
-            YamlScanner yamlScanner = new YamlScanner(reader);
+    @Nested
+    @DisplayName("test-yaml-scanner#2.yaml")
+    class TestYamlScanner$2 extends AbstractYamlScannedDelegator {
 
-            BiConsumer<YamlScanner, YamlToken.YamlTokenKind> scanAndAssertKind = (scanner, kind) -> {
-                scanner.scan();
-                assertEquals(scanner.currentToken().kind, kind);
-            };
+        @Override
+        public String yaml() {
+            return "test-yaml-scanner#2.yaml";
+        }
 
+        @Test
+        @DisplayName("normal lexical")
+        void scanYamlFileNormalLexical() {
             // normal key-value
-            scanAndAssertKind.accept(yamlScanner, YamlToken.YamlTokenKind.LITERAL);
-            scanAndAssertKind.accept(yamlScanner, YamlToken.YamlTokenKind.SPLIT);
-            scanAndAssertKind.accept(yamlScanner, YamlToken.YamlTokenKind.LITERAL);
+            testScanKeySplitValue();
 
             // comment
-            scanAndAssertKind.accept(yamlScanner, YamlToken.YamlTokenKind.COMMENT);
-            scanAndAssertKind.accept(yamlScanner, YamlToken.YamlTokenKind.COMMENT);
-            scanAndAssertKind.accept(yamlScanner, YamlToken.YamlTokenKind.COMMENT);
-        });
+            testComments(3);
+
+            // value with whiteSpace
+            testScanKeySplitValue();
+
+            // test content
+            testCurrentContent("aaa aaaa aaaa");
+        }
     }
 }
