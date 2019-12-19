@@ -26,6 +26,21 @@ public class LineColumn implements Comparable<LineColumn> {
         return new LineColumn(line, column - 1);
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (super.equals(obj)) {
+            return true;
+        }
+
+        if (obj instanceof LineColumn) {
+            LineColumn another = (LineColumn) obj;
+
+            return another.line == line && another.column == column;
+        }
+
+        return false;
+    }
+
     public LineColumn copy() {
         return new LineColumn(line, column);
     }

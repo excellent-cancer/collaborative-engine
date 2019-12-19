@@ -12,6 +12,8 @@ import java.io.Reader;
 import java.util.LinkedList;
 import java.util.UUID;
 
+import static collaborative.engine.content.yaml.YamlToken.YamlTokenKind.*;
+
 /**
  * Built-in lexical analyzer for yaml file to avoid to use
  * third-part library.
@@ -152,7 +154,7 @@ public class YamlScanner implements ContentScanner {
      * @return whether to scan for new tokens including EOF.
      */
     private boolean scanComment() {
-        if (yamlReader.current(YamlTokenizer.COMMENT_SIGN)) {
+        if (yamlReader.current(COMMENT.sign)) {
             tracker.markLineColumn();
             do {
                 tracker.skipChar();
@@ -192,7 +194,7 @@ public class YamlScanner implements ContentScanner {
      * @return whether to scan for new tokens including EOF.
      */
     private boolean scanItems() {
-        if (yamlReader.current(YamlTokenizer.ITEM_SIGN)) {
+        if (yamlReader.current(ITEM.sign)) {
             tracker.markLineColumn();
 
             // At this step, the current character must not be a comment, whiteSpace, or EOF.
@@ -214,11 +216,11 @@ public class YamlScanner implements ContentScanner {
                         return false;
                     }
                 }
-            } while (yamlReader.current(YamlTokenizer.ITEM_SIGN));
+            } while (yamlReader.current(ITEM.sign));
 
             StringBuilder literal = new StringBuilder();
             if (includeItemSign) {
-                literal.append(YamlTokenizer.ITEM_SIGN);
+                literal.append(ITEM.sign);
             } else {
                 tracker.skipWhiteSpaceContinuously();
             }
@@ -236,7 +238,7 @@ public class YamlScanner implements ContentScanner {
                     return false;
                 }
 
-                if (yamlReader.current(YamlTokenizer.SPLIT_SIGN)) {
+                if (yamlReader.current(SPLIT.sign)) {
                     tracker.skipChar();
                     if (yamlReader.isWhiteSpace()) {
                         tracker.saveNamedToken(literal.toString());
@@ -272,7 +274,7 @@ public class YamlScanner implements ContentScanner {
             str.append(yamlReader.current());
             tracker.skipChar();
 
-            if (yamlReader.current(YamlTokenizer.SPLIT_SIGN)) {
+            if (yamlReader.current(SPLIT.sign)) {
                 tracker.skipChar();
                 if (yamlReader.isWhiteSpace()) {
                     tracker.skipChar();
@@ -280,7 +282,7 @@ public class YamlScanner implements ContentScanner {
                     tracker.saveSplitToken();
                     return true;
                 }
-                str.append(YamlTokenizer.SPLIT_SIGN);
+                str.append(SPLIT.sign);
             }
         } while (scanAnymore());
 
@@ -325,22 +327,6 @@ public class YamlScanner implements ContentScanner {
 
 
     // Utils function
-
-    private Paragraph from(LineColumn startLineColumn) {
-        return Paragraph.of(startLineColumn, lineColumn());
-    }
-
-    private Paragraph from(int line, int column) {
-        return Paragraph.of(LineColumn.of(line, column), lineColumn());
-    }
-
-    private Paragraph from(int line, int column, LineColumn endLineColumn) {
-        return Paragraph.of(LineColumn.of(line, column), endLineColumn);
-    }
-
-    private Paragraph from() {
-        return Paragraph.identical(lineColumn());
-    }
 
     private void reportTrace(String message) {
         LOGGER.trace("[{}][{}:{}] {}", scanId, currentLine(), currentColumn(), message);
@@ -400,11 +386,13 @@ public class YamlScanner implements ContentScanner {
         }
 
         void saveLiteralToken(String content) {
-            LineColumn start = LineColumn.of(markedLine, markedColumn);
-            LineColumn end = LineColumn.of(markedLine, markedColumn + content.length() - 1);
-            YamlToken literalToken = YamlToken.literal(Paragraph.of(start, end), content);
-            scanned.push(literalToken);
-            reportTraceAndContent(literalToken, "literal token");
+            if (!content.isEmpty()) {
+                LineColumn start = LineColumn.of(markedLine, markedColumn);
+                LineColumn end = LineColumn.of(markedLine, markedColumn + content.length() - 1);
+                YamlToken literalToken = YamlToken.literal(Paragraph.of(start, end), content);
+                scanned.push(literalToken);
+                reportTraceAndContent(literalToken, "literal token");
+            }
         }
 
         void saveSplitToken() {

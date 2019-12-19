@@ -76,7 +76,7 @@ public class YamlToken extends Token {
         /**
          * line comment
          */
-        COMMENT("#"),
+        COMMENT("#", '#'),
         /**
          * key delimiter
          */
@@ -88,20 +88,23 @@ public class YamlToken extends Token {
         /**
          * value delimiter
          */
-        SPLIT(":"),
+        SPLIT(":", ':'),
         /**
          * the beginning of an array item
          */
-        ITEM("-");
+        ITEM("-", '-');
 
         public final String name;
 
+        public Character sign;
+
         YamlTokenKind() {
-            this(null);
+            this(null, null);
         }
 
-        YamlTokenKind(String name) {
+        YamlTokenKind(String name, Character sign) {
             this.name = name;
+            this.sign = sign;
         }
     }
 }

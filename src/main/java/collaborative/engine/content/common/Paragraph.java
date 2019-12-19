@@ -31,6 +31,10 @@ public class Paragraph {
         return end;
     }
 
+    public boolean identical() {
+        return start.equals(end);
+    }
+
     public static Paragraph identical(LineColumn lineColumn) {
         return new Paragraph(Objects.requireNonNull(lineColumn));
     }
