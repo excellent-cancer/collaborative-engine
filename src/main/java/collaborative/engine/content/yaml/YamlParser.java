@@ -4,7 +4,7 @@ import collaborative.engine.content.core.Token;
 
 import java.util.*;
 
-import static collaborative.engine.content.yaml.YamlToken.YamlTokenKind.*;
+import static collaborative.engine.content.yaml.YamlTokenKind.*;
 
 public class YamlParser {
 
@@ -127,7 +127,7 @@ public class YamlParser {
 
     }
 
-    private void throwIfNot(YamlToken.YamlTokenKind kind) {
+    private void throwIfNot(YamlTokenKind kind) {
         if (token.kind != kind) {
             throw new RuntimeException();
         }

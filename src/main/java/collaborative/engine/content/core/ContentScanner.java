@@ -5,13 +5,13 @@ import collaborative.engine.content.common.LineColumn;
 /**
  * @author XyParaCrim
  */
-public interface ContentScanner {
+public interface ContentScanner<T extends Token.TokenKind> {
 
     int currentLine();
 
     int currentColumn();
 
-    Token currentToken();
+    Token<T> currentToken();
 
     void scan();
 

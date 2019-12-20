@@ -38,20 +38,20 @@ public class YamlScannerTest {
             this.yamlScanner = yamlScanner;
         }
 
-        protected void testNextTokenKind(YamlToken.YamlTokenKind kind) {
+        protected void testNextTokenKind(YamlTokenKind kind) {
             yamlScanner.scan();
             assertEquals(yamlScanner.currentToken().kind, kind);
         }
 
         protected void testScanKeySplitValue() {
-            testNextTokenKind(YamlToken.YamlTokenKind.NAMED);
-            testNextTokenKind(YamlToken.YamlTokenKind.SPLIT);
-            testNextTokenKind(YamlToken.YamlTokenKind.LITERAL);
+            testNextTokenKind(YamlTokenKind.NAMED);
+            testNextTokenKind(YamlTokenKind.SPLIT);
+            testNextTokenKind(YamlTokenKind.LITERAL);
         }
 
         protected void testComments(int lines) {
             while (lines-- > 0) {
-                testNextTokenKind(YamlToken.YamlTokenKind.COMMENT);
+                testNextTokenKind(YamlTokenKind.COMMENT);
             }
         }
 
@@ -69,7 +69,7 @@ public class YamlScannerTest {
     }
 
     @Nested
-    @DisplayName("test-yaml-scanner#1.yaml")
+    @DisplayName("scan test-yaml-scanner#1.yaml")
     class TestYamlScanner$1 extends AbstractYamlScannedDelegator {
 
         @Override
@@ -79,12 +79,12 @@ public class YamlScannerTest {
 
         @Test
         void scanYamlFileNullContent() {
-            testNextTokenKind(YamlToken.YamlTokenKind.EOF);
+            testNextTokenKind(YamlTokenKind.EOF);
         }
     }
 
     @Nested
-    @DisplayName("test-yaml-scanner#2.yaml")
+    @DisplayName("scan test-yaml-scanner#2.yaml")
     class TestYamlScanner$2 extends AbstractYamlScannedDelegator {
 
         @Override

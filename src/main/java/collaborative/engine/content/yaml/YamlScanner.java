@@ -12,7 +12,7 @@ import java.io.Reader;
 import java.util.LinkedList;
 import java.util.UUID;
 
-import static collaborative.engine.content.yaml.YamlToken.YamlTokenKind.*;
+import static collaborative.engine.content.yaml.YamlTokenKind.*;
 
 /**
  * Built-in lexical analyzer for yaml file to avoid to use
@@ -21,7 +21,7 @@ import static collaborative.engine.content.yaml.YamlToken.YamlTokenKind.*;
  * @author XyParaCrim
  */
 @SuppressWarnings("unused")
-public class YamlScanner implements ContentScanner {
+public class YamlScanner implements ContentScanner<YamlTokenKind> {
 
     private static final Logger LOGGER = LogManager.getLogger(YamlScanner.class);
 
@@ -38,12 +38,12 @@ public class YamlScanner implements ContentScanner {
     /**
      * The current scanned token.
      */
-    private Token token;
+    private YamlToken token;
 
     /**
      * Store scanned multiple tokens.
      */
-    LinkedList<Token> scanned;
+    LinkedList<YamlToken> scanned;
 
     /**
      * Record scan locations and generate tokens.
@@ -72,7 +72,7 @@ public class YamlScanner implements ContentScanner {
     // Main Export
 
     @Override
-    public Token currentToken() {
+    public YamlToken currentToken() {
         return token;
     }
 
@@ -89,7 +89,7 @@ public class YamlScanner implements ContentScanner {
     @Override
     public boolean scannable() {
         return !(isReachErrorOrEFO ||
-                (isReachErrorOrEFO = token.kind == YamlToken.YamlTokenKind.ERROR || token.kind == YamlToken.YamlTokenKind.EOF));
+                (isReachErrorOrEFO = token.kind == YamlTokenKind.ERROR || token.kind == YamlTokenKind.EOF));
     }
 
     @Override
@@ -332,13 +332,13 @@ public class YamlScanner implements ContentScanner {
         LOGGER.trace("[{}][{}:{}] {}", scanId, currentLine(), currentColumn(), message);
     }
 
-    private void reportTrace(Token token, String message) {
+    private void reportTrace(YamlToken token, String message) {
         LineColumn start = token.paragraph.start();
         LineColumn end = token.paragraph.end();
         LOGGER.trace("[{}][{}:{}-{}:{}] {}", scanId, start.line, start.column, end.line, end.column, message);
     }
 
-    private void reportTraceAndContent(Token token, String message) {
+    private void reportTraceAndContent(YamlToken token, String message) {
         LineColumn start = token.paragraph.start();
         LineColumn end = token.paragraph.end();
         LOGGER.debug("[{}][{}:{}-{}:{}] {}: \"{}\"", scanId, start.line, start.column, end.line, end.column, message, token.content);

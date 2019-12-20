@@ -47,7 +47,7 @@ public interface ContentReader {
     }
 
     default boolean isWhiteSpace() {
-        return Character.isWhitespace(current());
+        return current(' ') || current('\t') || current((char) 0xC);
     }
 
     default boolean isLineTerminator() {

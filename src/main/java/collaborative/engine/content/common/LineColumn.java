@@ -3,6 +3,9 @@ package collaborative.engine.content.common;
 import org.jetbrains.annotations.NotNull;
 import pact.annotation.DataStruct;
 
+/**
+ * @author XyParaCrim
+ */
 @DataStruct
 public class LineColumn implements Comparable<LineColumn> {
     /**  */
