@@ -12,10 +12,8 @@ import java.util.Map;
  */
 public final class ContentSupport {
 
-    // TO-REMOVE
-    public static Map<String, Object> loadYaml(Path path) throws IOException {
-        return Yaml.load(Files.newBufferedReader(path));
+    public static Map<String, Object> flatLoadYaml(Path path) throws IOException {
+        return Yaml.flat(Files.newBufferedReader(path));
     }
-
 
 }

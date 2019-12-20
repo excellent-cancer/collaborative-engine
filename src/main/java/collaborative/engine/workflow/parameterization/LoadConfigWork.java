@@ -29,7 +29,7 @@ class LoadConfigWork implements Work.UncheckedWork {
         // load config from collaborative.yaml as map
         Map<String, Object> properties;
         try {
-            properties = ContentSupport.loadYaml(collaborativeYaml);
+            properties = ContentSupport.flatLoadYaml(collaborativeYaml);
         } catch (IOException e) {
             LOGGER.error("failed to load collaborative.yaml from {}", collaborativeYaml);
             return workflow.fail(e);
