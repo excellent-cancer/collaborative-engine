@@ -43,14 +43,6 @@
             <artifactId>junit-jupiter</artifactId>
             <scope>test</scope>
         </dependency>
-
-        <!--  template dependencies  -->
-
-        <dependency>
-            <groupId>org.yaml</groupId>
-            <artifactId>snakeyaml</artifactId>
-            <version>1.25</version>
-        </dependency>
     </dependencies>
 
     <build>
