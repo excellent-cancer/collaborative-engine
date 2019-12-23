@@ -1,7 +1,7 @@
 package collaborative.engine.workflow;
 
 import collaborative.engine.parameterize.Parameter;
-import collaborative.engine.parameterize.ParameterVariables;
+import collaborative.engine.parameterize.ParameterTable;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import pact.etc.ConfigureCheckProcessing;
@@ -16,25 +16,25 @@ public class WorkProcessing implements ConfigureCheckProcessing {
 
     private static final Logger LOGGER = LogManager.getLogger(WorkProcessing.class);
 
-    private final ParameterVariables parameterStore;
-
     @Override
     public Logger logger() {
         return LOGGER;
     }
 
-    public WorkProcessing(ParameterVariables parameterStore) {
-        this.parameterStore = Objects.requireNonNull(parameterStore, "parameterStore is required");
+    private final ParameterTable parameterTable;
+
+    public WorkProcessing(ParameterTable parameterTable) {
+        this.parameterTable = Objects.requireNonNull(parameterTable, "parameterStore is required");
     }
 
     public <T> T parameter(Parameter<T> parameter) {
-        return parameter != null ? parameter.get(parameterStore) : null;
+        return parameter != null ? parameter.get(parameterTable) : null;
     }
 
     public <T> T parameterOrDefault(Parameter<T> parameter) {
         T value;
         return parameter != null ?
-                (value = parameter.get(parameterStore)) == null ?
+                (value = parameter.get(parameterTable)) == null ?
                         parameter.defaultValue() :
                         value :
                 null;
@@ -42,11 +42,11 @@ public class WorkProcessing implements ConfigureCheckProcessing {
     }
 
     public <T> boolean setParameterIfAbsent(Parameter<T> parameter, T value) {
-        parameter.set(parameterStore, value);
+        parameter.set(parameterTable, value);
         return true;
     }
 
     public <T> void setParameter(Parameter<T> parameter, T value) {
-        parameter.set(parameterStore, value);
+        parameter.set(parameterTable, value);
     }
 }

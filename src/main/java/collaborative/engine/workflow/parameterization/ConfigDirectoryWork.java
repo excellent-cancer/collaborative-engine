@@ -7,7 +7,6 @@ import collaborative.engine.workflow.Workflow;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 
 import static collaborative.engine.ParameterGroup.COLLABORATIVE_CONFIG_FILE;
 import static collaborative.engine.ParameterGroup.CONFIG_DIRECTORY;
@@ -20,45 +19,47 @@ import static collaborative.engine.ParameterGroup.CONFIG_DIRECTORY;
  */
 public class ConfigDirectoryWork implements Work.OnlyCheckWork {
 
-    private final Path directoryPath;
-
-    public ConfigDirectoryWork(String configDirectory) {
-        this.directoryPath = Paths.get(configDirectory).toAbsolutePath();
-    }
-
     @Override
     public boolean check(WorkProcessing processing) {
-        return checkDirectory(processing)
-                && checkParameterPresent(processing)
-                && checkCollaborativeYaml(processing);
+        Path directoryPath = processing.parameter(CONFIG_DIRECTORY);
+
+        return checkDirectory(processing, directoryPath) &&
+                checkCollaborativeYaml(processing, directoryPath);
     }
 
-    @Override
-    public Workflow nextWork(WorkProcessing workProcessing, Workflow workflow) {
-        return workflow.then(new LoadConfigWork());
-    }
+    /**
+     * 检查参数表中的{@code collaborative.engine.ParameterGroup.CONFIG_DIRECTORY}的值：
+     * 该路径是否为目录
+     *
+     * @param processing    工作过程
+     * @param directoryPath {@code collaborative.engine.ParameterGroup.CONFIG_DIRECTORY}的值
+     * @return 该参数是否正确
+     */
+    private boolean checkDirectory(WorkProcessing processing, Path directoryPath) {
+        if (directoryPath == null) {
+            processing.reportConfigureNotFound("missing parameters in the parameter-table", CONFIG_DIRECTORY.name());
+            return false;
+        }
 
-    private boolean checkDirectory(WorkProcessing processing) {
         // validate whether the path is a directory
         if (!Files.isDirectory(directoryPath)) {
             processing.reportConfigureNotFound("the config path is not a directory");
             return false;
         }
+
         processing.reportConfigureFound("config-directory", directoryPath);
         return true;
     }
 
-    private boolean checkParameterPresent(WorkProcessing processing) {
-        // test whether the parameter has been already set
-        if (!processing.setParameterIfAbsent(CONFIG_DIRECTORY, directoryPath)) {
-            processing.reportConfigureError("config-directory-parameter", "the config-directory-parameter has already been set");
-            return false;
-        }
-        processing.reportConfigureFound("config-directory-parameter");
-        return true;
-    }
-
-    private boolean checkCollaborativeYaml(WorkProcessing processing) {
+    /**
+     * 检查参数表中的{@code collaborative.engine.ParameterGroup.CONFIG_DIRECTORY}的值：
+     * 该路径下是否存在collaborative.yaml文件
+     *
+     * @param processing    工作过程
+     * @param directoryPath {@code collaborative.engine.ParameterGroup.CONFIG_DIRECTORY}的值
+     * @return 该参数是否正确
+     */
+    private boolean checkCollaborativeYaml(WorkProcessing processing, Path directoryPath) {
         // validate if collaborative.yaml exists
         Path collaborativeYaml = directoryPath.resolve("collaborative.yaml");
         if (Files.exists(collaborativeYaml)) {
@@ -69,6 +70,12 @@ public class ConfigDirectoryWork implements Work.OnlyCheckWork {
         processing.reportConfigureNotFound("collaborative.yaml", collaborativeYaml);
         return false;
     }
+
+    @Override
+    public Workflow nextWork(WorkProcessing workProcessing, Workflow workflow) {
+        return workflow.then(new LoadConfigWork());
+    }
+
 
     private static class IllegalConfigException extends RuntimeException {
         public IllegalConfigException(String message) {

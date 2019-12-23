@@ -6,6 +6,7 @@ import collaborative.engine.workflow.Workflow;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import pact.support.ExecutorSupport;
+import pact.support.IgnoredSupport;
 
 import java.util.concurrent.CountDownLatch;
 
@@ -17,21 +18,12 @@ public class KeepAliveWork implements Work.UncheckedWork {
         final CountDownLatch downLatch = new CountDownLatch(1);
         Runtime.getRuntime().addShutdownHook(new Thread(downLatch::countDown));
 
-        return () -> {
-            try {
-                downLatch.await();
-            } catch (InterruptedException e) {
-
-            }
-        };
+        return IgnoredSupport.collectIgnored(downLatch::await);
     }
-
 
     @Override
     public Workflow proceed(WorkProcessing workProcessing, Workflow workflow) {
-        ExecutorSupport.singleOnlyThreadExecutor().
-                submit(keepAliveTask());
-
+        ExecutorSupport.execute(keepAliveTask());
         return null;
     }
 }

@@ -5,11 +5,11 @@ package collaborative.engine.parameterize;
  */
 public interface Parameter<T> {
     @SuppressWarnings("unchecked")
-    default T get(ParameterVariables variables) {
+    default T get(ParameterTable variables) {
         return (T) variables.get(name());
     }
 
-    default void set(ParameterVariables variables, T value) {
+    default void set(ParameterTable variables, T value) {
         variables.put(name(), value);
     }
 

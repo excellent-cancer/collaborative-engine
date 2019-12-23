@@ -18,7 +18,7 @@ import static collaborative.engine.ParameterGroup.*;
 /**
  * @author XyParaCrim
  */
-class LoadConfigWork implements Work.UncheckedWork {
+public class LoadConfigWork implements Work.UncheckedWork {
 
     private static final Logger LOGGER = LogManager.getLogger(LoadConfigWork.class);
 
