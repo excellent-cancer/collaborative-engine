@@ -1,7 +1,8 @@
 package collaborative.engine.content.yaml;
 
 import collaborative.engine.content.core.Token;
-import pact.annotation.NotQualified;
+import pact.annotation.NotNull;
+import pact.annotation.Unqualified;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -9,7 +10,7 @@ import java.util.Stack;
 
 import static collaborative.engine.content.yaml.YamlTokenKind.COMMENT;
 
-@NotQualified
+@Unqualified
 class ParseYamlTracker {
 
     private static final String NULL_VALUE = null;
@@ -94,6 +95,7 @@ class ParseYamlTracker {
         return flatProperties;
     }
 
+    @NotNull
     static ParseYamlTracker makeAndSkip(YamlScanner scanner) {
         ParseYamlTracker parseYamlTracker = new ParseYamlTracker(scanner);
         parseYamlTracker.nextTokenAndSkipComment();

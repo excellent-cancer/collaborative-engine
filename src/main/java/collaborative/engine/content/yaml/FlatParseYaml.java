@@ -3,6 +3,7 @@ package collaborative.engine.content.yaml;
 import collaborative.engine.content.core.Parse;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
 
@@ -12,6 +13,7 @@ import static collaborative.engine.content.yaml.YamlTokenKind.SPLIT;
 /**
  * @author XyParaCrim
  */
+@SuppressWarnings("unused")
 public class FlatParseYaml implements Parse<Map<String, Object>, YamlTokenKind, YamlScanner> {
 
     private static final Logger LOGGER = LogManager.getLogger(FlatParseYaml.class);
@@ -36,7 +38,7 @@ public class FlatParseYaml implements Parse<Map<String, Object>, YamlTokenKind, 
         }
     }
 
-    private void resolveNamed(ParseYamlTracker parseYamlTracker) {
+    private void resolveNamed(@NotNull ParseYamlTracker parseYamlTracker) {
         // 不允许键值为空
         YamlToken key = parseYamlTracker.token();
         if (key.content.isBlank()) {
@@ -122,6 +124,33 @@ public class FlatParseYaml implements Parse<Map<String, Object>, YamlTokenKind, 
 
     private void resolveItem(ParseYamlTracker parseYamlTracker) {
         throw new UnsupportedOperationException();
-    }
 
+/*        parseYamlTracker.nextToken();
+        switch (parseYamlTracker.kind()) {
+            case LITERAL:
+                Stream<YamlToken> values = Stream.of(parseYamlTracker.token());
+
+                parseYamlTracker.nextTokenAndSkipComment();
+
+                if (parseYamlTracker.is(ITEM)) {
+                    parseYamlTracker.nextToken();
+                    if (parseYamlTracker.is(LITERAL)) {
+
+
+                    } else {
+                        throw new RuntimeException();
+                    }
+                }
+                break;
+            case NAMED:
+                resolveNamed(parseYamlTracker);
+                break;
+
+
+
+
+            default:
+                throw new RuntimeException();
+        }*/
+    }
 }
