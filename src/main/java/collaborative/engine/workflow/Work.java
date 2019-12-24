@@ -37,11 +37,11 @@ public interface Work extends CheckFor<WorkProcessing> {
         Workflow nextWork(WorkProcessing workProcessing, Workflow workflow);
     }
 
-    interface WorkSlot<T extends Work> {
-        Class<T> from();
-    }
-
     static <T extends Work> String qualified(Class<T> tClass, String name) {
         return tClass.getSimpleName() + "." + name;
+    }
+
+    @SuppressWarnings("unused")
+    interface WorkSlot<T extends Work> {
     }
 }

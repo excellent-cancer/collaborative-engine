@@ -2,16 +2,24 @@ package collaborative.engine.workflow;
 
 import collaborative.engine.parameterize.ParameterTable;
 import collaborative.engine.workflow.config.Proceed;
+import collaborative.engine.workflow.config.ProceedAllAfter;
 import collaborative.engine.workflow.config.ProceedEachAfter;
 import org.apache.logging.log4j.LogManager;
+import pact.support.ExecutorSupport;
+import pact.support.ReflectSupport;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.nio.file.Path;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ExecutorService;
+
+import static collaborative.engine.ParameterGroup.CONFIG_DIRECTORY;
 
 /**
  * @author XyParaCrim
@@ -19,57 +27,71 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 public final class WorkflowFactory {
 
     public static Workflow bootstrap(String configDirectory, Object workflowConfig) {
-        WorkPool workPool = new WorkPool(workflowConfig);
-
-        return new WorkflowImp(workPool);
+        return new WorkflowImp(WorkPool.load(workflowConfig), WorkProcessingImp.make(configDirectory));
     }
-
 
     private static class WorkPool {
 
-        private final List<Method> startWork;
+        private static boolean legalMethod(Method method) {
+            return method.getReturnType().isAssignableFrom(Work.class);
+        }
 
-        private final Map<Class<? extends Work>, WorkInfo> workMap = new ConcurrentHashMap<>();
+        private final List<Method> startWork = new LinkedList<>();
+
+        private final Map<Class<? extends Work>, List<Method>> defaultSlotsMap = new ConcurrentHashMap<>();
+
+        private final Map<Class<? extends Work.WorkSlot<? extends Work>>, List<Method>> nameSlotsMap = new ConcurrentHashMap<>();
 
         private final Object configContext;
 
         public WorkPool(Object workflowConfig) {
-            Objects.requireNonNull(workflowConfig);
-            configContext = workflowConfig;
-            startWork = new LinkedList<>();
-            for (Method method : workflowConfig.getClass().getMethods()) {
+            this.configContext = workflowConfig;
+            ReflectSupport.walkMethod(workflowConfig, WorkPool::legalMethod, method -> {
+                ReflectSupport.ifAnnotated(method, Proceed.class, this::resolveProceed);
+                ReflectSupport.ifAnnotated(method, ProceedAllAfter.class, this::resolveProceedAllAfter);
+                ReflectSupport.ifAnnotated(method, ProceedEachAfter.class, this::resolveProceedEachAfter);
+            });
+        }
 
-                Proceed parallelStart = method.getAnnotation(Proceed.class);
-                if (parallelStart != null && method.getReturnType().isAssignableFrom(Work.class)) {
-                    startWork.add(method);
-                }
-
-                ProceedEachAfter proceedEachAfter = method.getAnnotation(ProceedEachAfter.class);
-                if (proceedEachAfter != null && method.getReturnType().isAssignableFrom(Work.class)) {
-                    Class<? extends Work>[] defaults = proceedEachAfter.value();
-                    for (Class<? extends Work> workClass : defaults) {
-                        WorkInfo workInfo = workMap.get(workClass);
-                        if (workInfo == null) {
-                            workInfo = new WorkInfo();
+        public <T extends Work> void doneWork(Class<T> workClass) {
+            defaultSlotsMap.getOrDefault(workClass, Collections.emptyList())
+                    .forEach(method -> {
+                        try {
+                            method.invoke(configContext);
+                        } catch (IllegalAccessException | InvocationTargetException e) {
+                            e.printStackTrace();
                         }
+                    });
+        }
 
-                        workInfo.addDefault(method);
-                    }
+        private void resolveProceed(Proceed proceed, Method method) {
+            startWork.add(method);
+        }
 
-                    Class<? extends Work.WorkSlot<? extends Work>>[] slots = proceedEachAfter.slots();
-
-
+        private void resolveProceedEachAfter(ProceedEachAfter proceedEachAfter, Method method) {
+            for (Class<? extends Work> defaultSlot : proceedEachAfter.value()) {
+                List<Method> methods = defaultSlotsMap.get(defaultSlot);
+                if (methods == null) {
+                    methods = new LinkedList<>();
                 }
-
+                methods.add(method);
             }
 
+            for (Class<? extends Work.WorkSlot<? extends Work>> nameSlot : proceedEachAfter.slots()) {
+                List<Method> methods = nameSlotsMap.get(nameSlot);
+                if (methods == null) {
+                    methods = new LinkedList<>();
+                }
+                methods.add(method);
+            }
         }
-    }
 
-    private static class WorkInfo {
+        private void resolveProceedAllAfter(ProceedAllAfter proceedAllAfter, Method method) {
+            // throw new UnsupportedOperationException();
+        }
 
-
-        public void addDefault(Method method) {
+        private static WorkPool load(Object workflowConfig) {
+            return new WorkPool(workflowConfig);
         }
     }
 
@@ -103,13 +125,35 @@ public final class WorkflowFactory {
         public WorkProcessingImp(ParameterTable parameterStore) {
             super(parameterStore);
         }
+
+        private static WorkProcessing make(String configDirectory) {
+            ParameterTable parameterTable = new ParameterTable();
+            CONFIG_DIRECTORY.set(parameterTable, Path.of(configDirectory));
+            return new WorkProcessingImp(parameterTable);
+        }
     }
 
     private static class WorkflowImp implements Workflow {
 
         private final ConcurrentLinkedQueue<Work> queue = new ConcurrentLinkedQueue<>();
 
-        public WorkflowImp(WorkPool workPool) {
+        private final WorkPool workPool;
+
+        private final WorkProcessing workProcessing;
+
+        private final ExecutorService executorService = ExecutorSupport.singleOnlyThreadExecutor();
+
+        public WorkflowImp(WorkPool workPool, WorkProcessing workProcessing) {
+            this.workPool = workPool;
+            this.workProcessing = workProcessing;
+
+            workPool.startWork.forEach(method -> {
+                try {
+                    method.invoke(workPool.configContext);
+                } catch (IllegalAccessException | InvocationTargetException e) {
+                    e.printStackTrace();
+                }
+            });
         }
 
         @Override

@@ -1,13 +1,11 @@
 package collaborative.engine.workflow.config;
 
 import collaborative.engine.workflow.Work;
-import collaborative.engine.workflow.WorkSlot;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import java.util.WeakHashMap;
 
 /**
  * @author XyParaCrim

@@ -25,9 +25,5 @@ public class PrepareWork implements Work.UncheckedWork {
     }
 
     public static final class Mysteriously implements WorkSlot<PrepareWork> {
-        @Override
-        public Class<PrepareWork> from() {
-            return PrepareWork.class;
-        }
     }
 }

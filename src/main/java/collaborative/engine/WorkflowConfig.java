@@ -19,8 +19,8 @@ class WorkflowConfig {
 
     @ProceedEachAfter(
             value = {
-                    ConfigDirectoryWork.class,
-                    PrepareWork.class
+                    PrepareWork.class,
+                    ConfigDirectoryWork.class
             },
             slots = Mysteriously.class
     )
