@@ -6,8 +6,12 @@ import org.apache.logging.log4j.Logger;
 import pact.cmp.lifecycle.LifecycleFactory;
 import pact.cmp.lifecycle.ServiceLifecycle;
 
+import java.util.Objects;
+import java.util.function.Supplier;
+
 /**
  * Collaborative engine facade
+ *
  * @author XyParaCrim
  * @scope export
  */
@@ -23,15 +27,32 @@ public final class CollaborativeEngine {
     /**
      * Static helper that can be used to run a engine from
      * the specified config files.
+     *
      * @param configDirectory config directory string
      */
     public static void run(String configDirectory) {
+        // TODO
+    }
+
+    /**
+     * Static helper that can be used to run a engine from
+     * the specified supplier.
+     *
+     * @param carcinogenSupplier supply collaborative-carcinogen
+     */
+    public static void run(Supplier<CollaborativeCarcinogen> carcinogenSupplier) {
+        CollaborativeCarcinogen collaborativeCarcinogen;
+        try {
+            collaborativeCarcinogen = Objects.requireNonNull(carcinogenSupplier).get();
+        } catch (RuntimeException e) {
+            return;
+        }
+
         if (LIFECYCLE.tryStarted()) {
             LOGGER.trace("collaborative-engine is starting...");
-            ROOT_WORKFLOW = WorkflowFactory.bootstrap(configDirectory, new WorkflowConfig());
+            ROOT_WORKFLOW = CollaborativeWorkflow.bootstrap(collaborativeCarcinogen);
         } else {
             LOGGER.warn("try to run collaborative-engine, but is's running.");
         }
     }
-
 }

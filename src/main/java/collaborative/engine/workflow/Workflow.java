@@ -8,31 +8,13 @@ package collaborative.engine.workflow;
  */
 public interface Workflow extends AutoCloseable {
 
-    /**
-     * Delegate to the next {@link Work} in the workflow.
-     * @param next next work by order
-     * @return return a equivalent workflow
-     */
-    Workflow then(Work next);
+    void fork();
 
-    /**
-     * Work task failed to complete.
-     * @param e the exception to commit, including its stack trace.
-     * @return 战术返回
-     */
-    Workflow fail(Throwable e);
+    void join();
 
-    Workflow fail();
+    void fail(Throwable e);
 
-    /**
-     * Return a
-     * @param target
-     * @param first
-     * @param second
-     * @param more
-     * @return
-     */
-    Workflow parallel(Work target, Work first, Work second, Work... more);
+    void finish();
 
-    Workflow end();
+    <T extends Work> void parallel(Class<Work.WorkSlot<T>> workSlotClass);
 }

@@ -1,15 +1,13 @@
 package collaborative.engine.workflow.parameterization;
 
 import collaborative.engine.parameterize.Parameter;
-import collaborative.engine.workflow.Work;
+import collaborative.engine.workflow.CheckForWork;
 import collaborative.engine.workflow.WorkProcessing;
-import collaborative.engine.workflow.Workflow;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-import static collaborative.engine.ParameterGroup.COLLABORATIVE_CONFIG_FILE;
-import static collaborative.engine.ParameterGroup.CONFIG_DIRECTORY;
+import static collaborative.engine.ParameterGroup.*;
 
 /**
  * Validate whether the specified config's directory is directory
@@ -17,22 +15,23 @@ import static collaborative.engine.ParameterGroup.CONFIG_DIRECTORY;
  *
  * @author XyParaCrim
  */
-public class ConfigDirectoryWork implements Work.OnlyCheckWork {
+public class ConfigDirectoryWork extends CheckForWork {
 
     @Override
     public boolean check(WorkProcessing processing) {
         Path directoryPath = processing.parameter(CONFIG_DIRECTORY);
-
         return checkDirectory(processing, directoryPath) &&
-                checkCollaborativeYaml(processing, directoryPath);
+                checkConfigFileExists(processing, directoryPath.resolve("log.yaml"), LOG_CONFIG_FILE) &&
+                checkConfigFileExists(processing, directoryPath.resolve("workflow.yaml"), WORKFLOW_CONFIG_FILE) &&
+                checkConfigFileExists(processing, directoryPath.resolve("collaborative.yaml"), COLLABORATIVE_CONFIG_FILE);
     }
 
     /**
-     * 检查参数表中的{@code collaborative.engine.ParameterGroup.CONFIG_DIRECTORY}的值：
+     * 检查参数表中的{@code collaborative.engine.ParameterGroup#CONFIG_DIRECTORY}的值：
      * 该路径是否为目录
      *
      * @param processing    工作过程
-     * @param directoryPath {@code collaborative.engine.ParameterGroup.CONFIG_DIRECTORY}的值
+     * @param directoryPath {@code collaborative.engine.ParameterGroup#CONFIG_DIRECTORY}的值
      * @return 该参数是否正确
      */
     private boolean checkDirectory(WorkProcessing processing, Path directoryPath) {
@@ -53,29 +52,25 @@ public class ConfigDirectoryWork implements Work.OnlyCheckWork {
 
     /**
      * 检查参数表中的{@code collaborative.engine.ParameterGroup.CONFIG_DIRECTORY}的值：
-     * 该路径下是否存在collaborative.yaml文件
+     * 该路径下是否存在配置文件
      *
-     * @param processing    工作过程
-     * @param directoryPath {@code collaborative.engine.ParameterGroup.CONFIG_DIRECTORY}的值
+     * @param processing 工作过程
+     * @param filePath   {@code collaborative.engine.ParameterGroup.CONFIG_DIRECTORY}的值
+     * @param parameter  参数表中的参数
      * @return 该参数是否正确
      */
-    private boolean checkCollaborativeYaml(WorkProcessing processing, Path directoryPath) {
-        // validate if collaborative.yaml exists
-        Path collaborativeYaml = directoryPath.resolve("collaborative.yaml");
-        if (Files.exists(collaborativeYaml)) {
-            processing.reportConfigureFound("collaborative.yaml");
-            processing.setParameter(COLLABORATIVE_CONFIG_FILE, collaborativeYaml);
+    private boolean checkConfigFileExists(WorkProcessing processing, Path filePath, Parameter<Path> parameter) {
+        if (Files.exists(filePath)) {
+            processing.reportConfigureFound(filePath.getFileName().toString());
+            processing.setParameter(parameter, filePath);
             return true;
         }
-        processing.reportConfigureNotFound("collaborative.yaml", collaborativeYaml);
+        processing.reportConfigureNotFound(filePath.getFileName().toString(), filePath);
         return false;
     }
 
-    @Override
-    public Workflow nextWork(WorkProcessing workProcessing, Workflow workflow) {
-        return workflow.then(new LoadConfigWork());
+    public static final class LoadConfigWorkSlot implements WorkSlot<ConfigDirectoryWork> {
     }
-
 
     private static class IllegalConfigException extends RuntimeException {
         public IllegalConfigException(String message) {

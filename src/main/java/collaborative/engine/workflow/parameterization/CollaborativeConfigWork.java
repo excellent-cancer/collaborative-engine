@@ -1,7 +1,6 @@
 package collaborative.engine.workflow.parameterization;
 
-import collaborative.engine.content.ContentSupport;
-import collaborative.engine.workflow.Work;
+import collaborative.engine.parameterize.Parameter;
 import collaborative.engine.workflow.WorkProcessing;
 import collaborative.engine.workflow.Workflow;
 import org.apache.logging.log4j.LogManager;
@@ -18,34 +17,17 @@ import static collaborative.engine.ParameterGroup.*;
 /**
  * @author XyParaCrim
  */
-public class LoadConfigWork implements Work.UncheckedWork {
+public class CollaborativeConfigWork extends AbstractLoadYamlFileWork {
 
-    private static final Logger LOGGER = LogManager.getLogger(LoadConfigWork.class);
+    private static final Logger LOGGER = LogManager.getLogger(CollaborativeConfigWork.class);
 
     @Override
-    public Workflow proceed(WorkProcessing workProcessing, Workflow workflow) {
-        Path collaborativeYaml = workProcessing.parameter(COLLABORATIVE_CONFIG_FILE);
-
-        // load config from collaborative.yaml as map
-        Map<String, Object> properties;
-        try {
-            properties = ContentSupport.flatLoadYaml(collaborativeYaml);
-        } catch (IOException e) {
-            LOGGER.error("failed to load collaborative.yaml from {}", collaborativeYaml);
-            return workflow.fail(e);
-        }
-
-        // build parameter from properties
-        if (!buildParameterFromProperties(properties, workProcessing, workflow)) {
-            return workflow.fail();
-        }
-
-        return workflow;
+    protected Parameter<Path> fileParameter() {
+        return COLLABORATIVE_CONFIG_FILE;
     }
 
-    // TO-REMOVE
-    private boolean buildParameterFromProperties(Map<String, Object> properties, WorkProcessing workProcessing, Workflow workflow) {
-
+    @Override
+    protected void buildParameterTable(Map<String, Object> properties, WorkProcessing workProcessing, Workflow workflow) {
         try {
             // TODO
             String dataDirectoryOption = (String) properties.get("data.path");
@@ -65,14 +47,10 @@ public class LoadConfigWork implements Work.UncheckedWork {
                 } catch (IOException e) {
                     LOGGER.error("fail to create directory({}).", dataDirectory);
                     workflow.fail(e);
-                    return false;
                 }
             }
-
-            return true;
         } catch (Exception e) {
             workflow.fail(e);
-            return false;
         }
     }
 }

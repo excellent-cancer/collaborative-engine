@@ -1,13 +1,13 @@
 package collaborative.engine;
 
 import collaborative.engine.workflow.Work;
+import collaborative.engine.workflow.WorkFactory;
 import collaborative.engine.workflow.config.Proceed;
 import collaborative.engine.workflow.config.ProceedEachAfter;
+import collaborative.engine.workflow.parameterization.CollaborativeConfigWork;
 import collaborative.engine.workflow.parameterization.ConfigDirectoryWork;
-import collaborative.engine.workflow.parameterization.LoadConfigWork;
-import collaborative.engine.workflow.parameterization.PrepareWork;
-
-import static collaborative.engine.workflow.parameterization.PrepareWork.Mysteriously;
+import collaborative.engine.workflow.parameterization.LogConfigWork;
+import collaborative.engine.workflow.parameterization.WorkflowConfigWork;
 
 @SuppressWarnings("unused")
 class WorkflowConfig {
@@ -17,14 +17,12 @@ class WorkflowConfig {
         return new ConfigDirectoryWork();
     }
 
-    @ProceedEachAfter(
-            value = {
-                    PrepareWork.class,
-                    ConfigDirectoryWork.class
-            },
-            slots = Mysteriously.class
-    )
-    public Work loadConfigWork() {
-        return new LoadConfigWork();
+    @ProceedEachAfter(ConfigDirectoryWork.class)
+    public Work loadConfigWorkSlot() {
+        return WorkFactory.parallel(
+                new LogConfigWork(),
+                new WorkflowConfigWork(),
+                new CollaborativeConfigWork()
+        );
     }
 }

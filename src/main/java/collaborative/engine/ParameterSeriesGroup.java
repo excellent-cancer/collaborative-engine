@@ -30,6 +30,12 @@ public final class ParameterSeriesGroup {
             ParameterSupport.prefix("log");
 
     /**
+     * About thread pool.
+     */
+    public static final ParameterSeries WORKFLOW_CONFIG =
+            ParameterSupport.prefix("workflow");
+
+    /**
      * Some global parameters that is not important for this project.
      */
     public static final ParameterSeries BASE_PARAMETER =
