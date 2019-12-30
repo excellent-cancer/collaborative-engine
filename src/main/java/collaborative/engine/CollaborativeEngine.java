@@ -1,6 +1,6 @@
 package collaborative.engine;
 
-import collaborative.engine.workflow.*;
+import collaborative.engine.workflow.Workflow;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import pact.cmp.lifecycle.LifecycleFactory;
@@ -20,7 +20,7 @@ public final class CollaborativeEngine {
 
     private static final Logger LOGGER = LogManager.getLogger(CollaborativeEngine.class);
 
-    private volatile static Workflow ROOT_WORKFLOW = WorkflowFactory.empty();
+    private volatile static Workflow ROOT_WORKFLOW = null;
 
     private volatile static ServiceLifecycle LIFECYCLE = LifecycleFactory.service();
 

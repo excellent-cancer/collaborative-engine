@@ -10,7 +10,7 @@ import pact.support.IgnoredSupport;
 
 import java.util.concurrent.CountDownLatch;
 
-public class KeepAliveWork implements Work.UncheckedWork {
+public class KeepAliveWork implements Work {
 
     private static final Logger LOGGER = LogManager.getLogger(KeepAliveWork.class);
 
@@ -22,8 +22,7 @@ public class KeepAliveWork implements Work.UncheckedWork {
     }
 
     @Override
-    public Workflow proceed(WorkProcessing workProcessing, Workflow workflow) {
+    public void proceed(WorkProcessing workProcessing, Workflow workflow) {
         ExecutorSupport.execute(keepAliveTask());
-        return null;
     }
 }
