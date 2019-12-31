@@ -35,6 +35,11 @@ public class CarcinogenFactor {
         return methods.stream().map(this::newWork).collect(Collectors.toList());
     }
 
+    public List<Work> slotWork(Class<? extends Work.WorkSlot<? extends Work>> workSlot) {
+        List<Method> methods = nameSlotsMap.getOrDefault(workSlot, Collections.emptyList());
+        return methods.stream().map(this::newWork).collect(Collectors.toList());
+    }
+
     public List<Work> startWork() {
         return startWork.stream().map(this::newWork).collect(Collectors.toList());
     }

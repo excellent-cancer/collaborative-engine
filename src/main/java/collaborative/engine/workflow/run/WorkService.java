@@ -18,4 +18,8 @@ public interface WorkService {
     void fail(Throwable e);
 
     void finish();
+
+    void parallel(Class<? extends Work.WorkSlot<? extends Work>> workSlotClass);
+
+    boolean pending2exit();
 }

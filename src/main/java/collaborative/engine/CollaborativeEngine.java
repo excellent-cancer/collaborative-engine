@@ -49,7 +49,7 @@ public final class CollaborativeEngine {
         }
 
         if (LIFECYCLE.tryStarted()) {
-            LOGGER.trace("collaborative-engine is starting...");
+            LOGGER.info("collaborative-engine is starting...");
             ROOT_WORKFLOW = CollaborativeWorkflow.bootstrap(collaborativeCarcinogen);
         } else {
             LOGGER.warn("try to run collaborative-engine, but is's running.");

@@ -12,8 +12,6 @@ import java.util.concurrent.CountDownLatch;
 
 public class KeepAliveWork implements Work {
 
-    private static final Logger LOGGER = LogManager.getLogger(KeepAliveWork.class);
-
     private static Runnable keepAliveTask() {
         final CountDownLatch downLatch = new CountDownLatch(1);
         Runtime.getRuntime().addShutdownHook(new Thread(downLatch::countDown));
@@ -23,6 +21,23 @@ public class KeepAliveWork implements Work {
 
     @Override
     public void proceed(WorkProcessing workProcessing, Workflow workflow) {
-        ExecutorSupport.execute(keepAliveTask());
+        final CountDownLatch shutdownLatch = new CountDownLatch(1);
+        final CountDownLatch workCountLatch = new CountDownLatch(1);
+        Runtime.getRuntime().addShutdownHook(new Thread(shutdownLatch::countDown));
+
+        ExecutorSupport.execute(() -> {
+            workCountLatch.countDown();
+            try {
+                shutdownLatch.await();
+            } catch (InterruptedException e) {
+                workflow.fail(e);
+            }
+        });
+
+        try {
+            workCountLatch.await();
+        } catch (InterruptedException e) {
+            workflow.fail(e);
+        }
     }
 }

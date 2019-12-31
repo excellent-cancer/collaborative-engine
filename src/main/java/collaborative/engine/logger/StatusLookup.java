@@ -8,11 +8,11 @@ import org.apache.logging.log4j.core.lookup.StrLookup;
 public class StatusLookup implements StrLookup {
     @Override
     public String lookup(String key) {
-        return "green";
+        return "RUNNING";
     }
 
     @Override
     public String lookup(LogEvent event, String key) {
-        return "green";
+        return "RUNNING";
     }
 }

@@ -3,11 +3,19 @@ package collaborative.engine.workflow;
 import collaborative.engine.CarcinogenFactor;
 import collaborative.engine.parameterize.ParameterTable;
 import collaborative.engine.workflow.run.WorkService;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
+import java.util.List;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.ForkJoinTask;
 import java.util.concurrent.RecursiveAction;
+import java.util.stream.Collectors;
 
 public class Workflow implements WorkService {
+
+    private static final Logger LOGGER = LogManager.getLogger(Workflow.class);
 
     private final CarcinogenFactor carcinogenFactor;
     public final ForkJoinPool forkJoinPool;
@@ -17,11 +25,17 @@ public class Workflow implements WorkService {
         this.carcinogenFactor = carcinogenFactor;
         this.forkJoinPool = new ForkJoinPool();
         this.processing = new WorkProcessingImp(carcinogenFactor.carcinogen.parameterTable());
-        this.carcinogenFactor.startWork().forEach(this::submit);
+        this.carcinogenFactor.startWork().forEach(this::invoke);
     }
 
     public void submit(Work work) {
+        LOGGER.debug("submit new work: \"{}\"", work.getClass().getSimpleName());
         forkJoinPool.submit(new RecursiveWork(work));
+    }
+
+    public void invoke(Work work) {
+        LOGGER.debug("invoke new work: \"{}\"", work.getClass().getSimpleName());
+        forkJoinPool.invoke(new RecursiveWork(work));
     }
 
     public RecursiveAction newAction(Work work) {
@@ -38,10 +52,14 @@ public class Workflow implements WorkService {
 
         @Override
         protected void compute() {
-            work.proceed(processing, Workflow.this);
+            try {
+                work.proceed(processing, Workflow.this);
+            } catch (Exception e) {
+                LOGGER.error(work.getClass(), e);
+            }
+            LOGGER.debug("done work: \"{}\"", work.getClass().getSimpleName());
 
-            carcinogenFactor.defaultWork(work.getClass()).
-                    forEach(work1 -> forkJoinPool.submit(new RecursiveWork(work1)));
+            carcinogenFactor.defaultWork(work.getClass()).forEach(Workflow.this::submit);
         }
     }
 
@@ -57,12 +75,36 @@ public class Workflow implements WorkService {
 
     @Override
     public void fail(Throwable e) {
+        LogManager.getLogger(Workflow.class).error(e);
         throw new UnsupportedOperationException();
     }
 
     @Override
     public void finish() {
         throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void parallel(Class<? extends Work.WorkSlot<? extends Work>> workSlotClass) {
+        List<RecursiveAction> actions = carcinogenFactor.
+                slotWork(workSlotClass).
+                stream().
+                map(RecursiveWork::new).
+                collect(Collectors.toList());
+
+        ForkJoinTask.invokeAll(actions);
+    }
+
+    private final CountDownLatch countDownLatch = new CountDownLatch(1);
+
+    @Override
+    public boolean pending2exit() {
+        try {
+            countDownLatch.await();
+        } catch (InterruptedException e) {
+        }
+
+        return true;
     }
 
     private static class WorkProcessingImp extends WorkProcessing {

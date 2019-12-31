@@ -3,6 +3,8 @@ package collaborative.engine.workflow.parameterization;
 import collaborative.engine.parameterize.Parameter;
 import collaborative.engine.workflow.CheckForWork;
 import collaborative.engine.workflow.WorkProcessing;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -15,7 +17,12 @@ import static collaborative.engine.ParameterGroup.*;
  *
  * @author XyParaCrim
  */
-public class ConfigDirectoryWork extends CheckForWork {
+public class ConfigDirectoryWork extends CheckForWork.ParallelCheckWork {
+
+    @Override
+    protected Class<? extends WorkSlot<? extends ParallelCheckWork>> workSlot() {
+        return LoadConfigWorkSlot.class;
+    }
 
     @Override
     public boolean check(WorkProcessing processing) {

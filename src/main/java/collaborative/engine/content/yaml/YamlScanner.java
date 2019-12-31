@@ -329,13 +329,13 @@ public class YamlScanner implements ContentScanner<YamlTokenKind> {
     // Utils function
 
     private void reportTrace(String message) {
-        LOGGER.trace("[{}][{}:{}] {}", scanId, currentLine(), currentColumn(), message);
+        LOGGER.debug("[{}][{}:{}] {}", scanId, currentLine(), currentColumn(), message);
     }
 
     private void reportTrace(YamlToken token, String message) {
         LineColumn start = token.paragraph.start();
         LineColumn end = token.paragraph.end();
-        LOGGER.trace("[{}][{}:{}-{}:{}] {}", scanId, start.line, start.column, end.line, end.column, message);
+        LOGGER.debug("[{}][{}:{}-{}:{}] {}", scanId, start.line, start.column, end.line, end.column, message);
     }
 
     private void reportTraceAndContent(YamlToken token, String message) {

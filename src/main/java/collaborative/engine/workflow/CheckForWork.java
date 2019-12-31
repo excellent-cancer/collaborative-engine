@@ -26,6 +26,20 @@ public abstract class CheckForWork implements Work, CheckFor<WorkProcessing> {
             }
         }
 
-        protected abstract <T extends SpecificCheckForWork> Class<? extends WorkSlot<T>> wortSlot();
+        protected abstract <T extends SpecificCheckForWork> Class<? extends WorkSlot<T>> workSlot();
+    }
+
+    public static abstract class ParallelCheckWork extends CheckForWork {
+
+        @Override
+        public void proceed(WorkProcessing workProcessing, Workflow workflow) {
+            if (check(workProcessing)) {
+                workflow.parallel(workSlot());
+            } else {
+                workflow.fail(new RuntimeException());
+            }
+        }
+
+        protected abstract Class<? extends WorkSlot<? extends ParallelCheckWork>> workSlot();
     }
 }

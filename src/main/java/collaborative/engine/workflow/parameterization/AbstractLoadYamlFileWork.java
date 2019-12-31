@@ -5,8 +5,6 @@ import collaborative.engine.parameterize.Parameter;
 import collaborative.engine.workflow.Work;
 import collaborative.engine.workflow.WorkProcessing;
 import collaborative.engine.workflow.Workflow;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -18,14 +16,10 @@ abstract class AbstractLoadYamlFileWork implements Work {
     public void proceed(WorkProcessing workProcessing, Workflow workflow) {
         Path yamlFile = workProcessing.parameter(fileParameter());
         Map<String, Object> properties = null;
-        Logger logger = LogManager.getLogger(this.getClass());
 
-        logger.info("try to resolve yaml file: {}", yamlFile);
         try {
             properties = ContentSupport.flatLoadYaml(yamlFile);
         } catch (IOException e) {
-            LogManager.getLogger(this.getClass()).
-                    error("failed to load collaborative.yaml from {}", yamlFile);
             workflow.fail(new RuntimeException());
         }
 

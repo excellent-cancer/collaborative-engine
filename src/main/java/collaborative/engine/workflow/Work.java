@@ -1,7 +1,5 @@
 package collaborative.engine.workflow;
 
-import pact.etc.CheckFor;
-
 /**
  * Contract for interception-style, chained processing of workflow.
  *

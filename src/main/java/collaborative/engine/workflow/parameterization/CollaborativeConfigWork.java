@@ -29,12 +29,11 @@ public class CollaborativeConfigWork extends AbstractLoadYamlFileWork {
     @Override
     protected void buildParameterTable(Map<String, Object> properties, WorkProcessing workProcessing, Workflow workflow) {
         try {
-            // TODO
             String dataDirectoryOption = (String) properties.get("data.path");
 
             Path dataDirectory = Paths.get(dataDirectoryOption);
             if (!dataDirectory.isAbsolute()) {
-                boolean isJoinedConfig = (boolean) properties.getOrDefault("data.joined-config", false);
+                boolean isJoinedConfig = Boolean.parseBoolean((String) properties.get("data.joined-config"));
 
                 dataDirectory = isJoinedConfig ?
                         workProcessing.parameter(CONFIG_DIRECTORY).resolve(dataDirectory) :
