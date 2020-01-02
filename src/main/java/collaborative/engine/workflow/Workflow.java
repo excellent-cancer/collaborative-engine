@@ -1,33 +1,28 @@
 package collaborative.engine.workflow;
 
 import collaborative.engine.CarcinogenFactor;
-import collaborative.engine.workflow.run.DispatcherWorkExecutor;
-import collaborative.engine.workflow.run.WorkUnitExecutor;
+import collaborative.engine.workflow.run.WorkflowExecutor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
-import java.util.concurrent.*;
-import java.util.stream.Collectors;
 
 public class Workflow implements WorkService {
 
     private static final Logger LOGGER = LogManager.getLogger(Workflow.class);
 
-    private final WorkUnitExecutor workUnitExecutor;
-    private final DispatcherWorkExecutor dispatcherExecutor = new DispatcherWorkExecutor();
+    private final WorkflowExecutor workflowExecutor;
     private final WorkProcessing processing;
     private final CarcinogenFactor carcinogenFactor;
 
     public Workflow(CarcinogenFactor carcinogenFactor) {
-        this.workUnitExecutor = new WorkUnitExecutor();
+        this.workflowExecutor = new WorkflowExecutor();
         this.processing = WorkProcessingSupport.processing(carcinogenFactor.carcinogen.parameterTable());
         this.carcinogenFactor = carcinogenFactor;
-        this.carcinogenFactor.handleStartProceedWork(work -> workUnitExecutor.invoke(work, this, processing));
+        this.carcinogenFactor.handleStartProceedWork(work -> workflowExecutor.invoke(work, this, processing));
     }
 
     @Override
     public void fork(Class<? extends Work> workClass) {
-        carcinogenFactor.handleDefaultProceedWork(workClass, work -> workUnitExecutor.submit(work, this, processing));
+        carcinogenFactor.handleDefaultProceedWork(workClass, work -> workflowExecutor.submit(work, this, processing));
     }
 
     @Override
@@ -38,12 +33,12 @@ public class Workflow implements WorkService {
 
     @Override
     public void dispatcher(DispatcherWork dispatcherWork) {
-        dispatcherExecutor.submit(dispatcherWork, this, processing);
+        workflowExecutor.submit(dispatcherWork, this, processing);
     }
 
     @Override
     public void parallel(Class<? extends Work.WorkSlot<? extends Work>> workSlotClass) {
-        workUnitExecutor.invokeAll(carcinogenFactor.slotProceedWork(workSlotClass), this, processing);
+        workflowExecutor.invokeAll(carcinogenFactor.slotProceedWork(workSlotClass), this, processing);
     }
 }
 

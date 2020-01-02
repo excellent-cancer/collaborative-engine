@@ -30,6 +30,10 @@ public class WorkProcessing implements ConfigureCheckProcessing {
         LOGGER.debug("[{}]: failed work", work.tagName());
     }
 
+    public void reportContinueWork(@NotNull Work work) {
+        LOGGER.debug("[{}]: continue work", work.tagName());
+    }
+
     @Override
     public Logger logger() {
         return LOGGER;

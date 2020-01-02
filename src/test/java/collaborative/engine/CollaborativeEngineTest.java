@@ -9,7 +9,6 @@ import collaborative.engine.workflow.parameterization.CollaborativeConfigWork;
 import collaborative.engine.workflow.parameterization.ConfigDirectoryWork;
 import collaborative.engine.workflow.parameterization.LogConfigWork;
 import collaborative.engine.workflow.parameterization.WorkflowConfigWork;
-import org.apache.logging.log4j.LogManager;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;

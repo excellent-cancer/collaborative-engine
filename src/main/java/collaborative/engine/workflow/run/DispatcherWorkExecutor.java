@@ -1,6 +1,6 @@
 package collaborative.engine.workflow.run;
 
-import collaborative.engine.workflow.Work;
+import collaborative.engine.workflow.DispatcherWork;
 import collaborative.engine.workflow.WorkProcessing;
 import collaborative.engine.workflow.Workflow;
 import org.jetbrains.annotations.NotNull;
@@ -13,9 +13,19 @@ public class DispatcherWorkExecutor implements ExecutorService {
 
     private final ExecutorService executorService = Executors.newFixedThreadPool(1);
 
-    public void submit(Work work, Workflow workflow, WorkProcessing processing) {
+    private final ConcurrentLinkedQueue<DispatcherWork> dispatcherWorks = new ConcurrentLinkedQueue<>();
+
+    public void submit(DispatcherWork work, Workflow workflow, WorkProcessing processing) {
         submit(() -> work.proceed(processing, workflow));
     }
+
+/*    private final class Dispatcher implements Runnable {
+
+        @Override
+        public void run() {
+
+        }
+    }*/
 
     @Override
     public void shutdown() {

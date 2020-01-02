@@ -3,8 +3,6 @@ package collaborative.engine.workflow.normalization;
 import collaborative.engine.workflow.Work;
 import collaborative.engine.workflow.WorkProcessing;
 import collaborative.engine.workflow.Workflow;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import pact.support.ExecutorSupport;
 import pact.support.IgnoredSupport;
 
@@ -43,5 +41,7 @@ public class KeepAliveWork extends Work {
         } catch (InterruptedException e) {
             workflow.fail(e);
         }
+
+        workflow.dispatcher(new SampleDispatcherWork());
     }
 }

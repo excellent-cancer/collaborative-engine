@@ -38,7 +38,6 @@ public class CollaborativeConfigWork extends AbstractLoadYamlFileWork {
             Path dataDirectory = Paths.get(dataDirectoryOption);
             if (!dataDirectory.isAbsolute()) {
                 boolean isJoinedConfig = Boolean.parseBoolean((String) properties.get("data.joined-config"));
-
                 dataDirectory = isJoinedConfig ?
                         workProcessing.parameter(CONFIG_DIRECTORY).resolve(dataDirectory) :
                         workProcessing.parameter(USER_DIRECTORY).resolve(dataDirectory);
