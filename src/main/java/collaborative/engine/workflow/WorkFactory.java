@@ -7,7 +7,7 @@ import java.util.concurrent.RecursiveAction;
 
 public final class WorkFactory {
 
-    public static Work parallel(Work... works) {
+/*    public static Work parallel(Work... works) {
         return (workProcessing, workflow) -> {
             List<RecursiveAction> actions = new LinkedList<>();
             for (Work work : works) {
@@ -16,6 +16,6 @@ public final class WorkFactory {
 
             ForkJoinTask.invokeAll(actions);
         };
-    }
+    }*/
 
 }

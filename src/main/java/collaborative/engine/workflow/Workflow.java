@@ -1,116 +1,49 @@
 package collaborative.engine.workflow;
 
 import collaborative.engine.CarcinogenFactor;
-import collaborative.engine.parameterize.ParameterTable;
-import collaborative.engine.workflow.run.WorkService;
+import collaborative.engine.workflow.run.DispatcherWorkExecutor;
+import collaborative.engine.workflow.run.WorkUnitExecutor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.List;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ForkJoinPool;
-import java.util.concurrent.ForkJoinTask;
-import java.util.concurrent.RecursiveAction;
+import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
 public class Workflow implements WorkService {
 
     private static final Logger LOGGER = LogManager.getLogger(Workflow.class);
 
-    private final CarcinogenFactor carcinogenFactor;
-    public final ForkJoinPool forkJoinPool;
+    private final WorkUnitExecutor workUnitExecutor;
+    private final DispatcherWorkExecutor dispatcherExecutor = new DispatcherWorkExecutor();
     private final WorkProcessing processing;
+    private final CarcinogenFactor carcinogenFactor;
 
     public Workflow(CarcinogenFactor carcinogenFactor) {
+        this.workUnitExecutor = new WorkUnitExecutor();
+        this.processing = WorkProcessingSupport.processing(carcinogenFactor.carcinogen.parameterTable());
         this.carcinogenFactor = carcinogenFactor;
-        this.forkJoinPool = new ForkJoinPool();
-        this.processing = new WorkProcessingImp(carcinogenFactor.carcinogen.parameterTable());
-        this.carcinogenFactor.startWork().forEach(this::invoke);
-    }
-
-    public void submit(Work work) {
-        LOGGER.debug("submit new work: \"{}\"", work.getClass().getSimpleName());
-        forkJoinPool.submit(new RecursiveWork(work));
-    }
-
-    public void invoke(Work work) {
-        LOGGER.debug("invoke new work: \"{}\"", work.getClass().getSimpleName());
-        forkJoinPool.invoke(new RecursiveWork(work));
-    }
-
-    public RecursiveAction newAction(Work work) {
-        return new RecursiveWork(work);
-    }
-
-    private class RecursiveWork extends RecursiveAction {
-
-        final Work work;
-
-        RecursiveWork(Work work) {
-            this.work = work;
-        }
-
-        @Override
-        protected void compute() {
-            try {
-                work.proceed(processing, Workflow.this);
-            } catch (Exception e) {
-                LOGGER.error(work.getClass(), e);
-            }
-            LOGGER.debug("done work: \"{}\"", work.getClass().getSimpleName());
-
-            carcinogenFactor.defaultWork(work.getClass()).forEach(Workflow.this::submit);
-        }
+        this.carcinogenFactor.handleStartProceedWork(work -> workUnitExecutor.submit(work, this, processing));
     }
 
     @Override
-    public void fork() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void join() {
-        throw new UnsupportedOperationException();
+    public void fork(Class<? extends Work> workClass) {
+        carcinogenFactor.handleDefaultProceedWork(workClass, work -> workUnitExecutor.submit(work, this, processing));
     }
 
     @Override
     public void fail(Throwable e) {
-        LogManager.getLogger(Workflow.class).error(e);
+        LOGGER.error(e);
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public void finish() {
-        throw new UnsupportedOperationException();
+    public void dispatcher(DispatcherWork dispatcherWork) {
+        dispatcherExecutor.submit(dispatcherWork, this, processing);
     }
 
     @Override
     public void parallel(Class<? extends Work.WorkSlot<? extends Work>> workSlotClass) {
-        List<RecursiveAction> actions = carcinogenFactor.
-                slotWork(workSlotClass).
-                stream().
-                map(RecursiveWork::new).
-                collect(Collectors.toList());
-
-        ForkJoinTask.invokeAll(actions);
-    }
-
-    private final CountDownLatch countDownLatch = new CountDownLatch(1);
-
-    @Override
-    public boolean pending2exit() {
-        try {
-            countDownLatch.await();
-        } catch (InterruptedException e) {
-        }
-
-        return true;
-    }
-
-    private static class WorkProcessingImp extends WorkProcessing {
-        WorkProcessingImp(ParameterTable parameterTable) {
-            super(parameterTable);
-        }
+        workUnitExecutor.invokeAll(carcinogenFactor.slotProceedWork(workSlotClass), this, processing);
     }
 }
 
