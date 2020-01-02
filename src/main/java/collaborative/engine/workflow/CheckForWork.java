@@ -2,7 +2,14 @@ package collaborative.engine.workflow;
 
 import pact.etc.CheckFor;
 
-public abstract class CheckForWork implements Work, CheckFor<WorkProcessing> {
+public abstract class CheckForWork extends Work implements CheckFor<WorkProcessing> {
+
+    public CheckForWork() {
+    }
+
+    public CheckForWork(String name) {
+        super(name);
+    }
 
     @Override
     public void proceed(WorkProcessing workProcessing, Workflow workflow) {
@@ -15,6 +22,10 @@ public abstract class CheckForWork implements Work, CheckFor<WorkProcessing> {
     public abstract boolean check(WorkProcessing processing);
 
     public static abstract class SpecificCheckForWork extends CheckForWork {
+
+        public SpecificCheckForWork(String name) {
+            super(name);
+        }
 
         @Override
         public void proceed(WorkProcessing workProcessing, Workflow workflow) {
@@ -30,6 +41,10 @@ public abstract class CheckForWork implements Work, CheckFor<WorkProcessing> {
     }
 
     public static abstract class ParallelCheckWork extends CheckForWork {
+
+        public ParallelCheckWork(String name) {
+            super(name);
+        }
 
         @Override
         public void proceed(WorkProcessing workProcessing, Workflow workflow) {

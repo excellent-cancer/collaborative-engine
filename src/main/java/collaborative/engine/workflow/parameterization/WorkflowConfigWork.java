@@ -14,6 +14,10 @@ import static collaborative.engine.ParameterGroup.WORKFLOW_CONFIG_FILE;
  */
 public class WorkflowConfigWork extends AbstractLoadYamlFileWork {
 
+    public WorkflowConfigWork() {
+        super("Resolve-Workflow.yaml");
+    }
+
     @Override
     protected Parameter<Path> fileParameter() {
         return WORKFLOW_CONFIG_FILE;

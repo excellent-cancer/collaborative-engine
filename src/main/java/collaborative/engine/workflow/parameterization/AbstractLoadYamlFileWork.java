@@ -10,7 +10,11 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Map;
 
-abstract class AbstractLoadYamlFileWork implements Work {
+abstract class AbstractLoadYamlFileWork extends Work {
+
+    public AbstractLoadYamlFileWork(String name) {
+        super(name);
+    }
 
     @Override
     public void proceed(WorkProcessing workProcessing, Workflow workflow) {

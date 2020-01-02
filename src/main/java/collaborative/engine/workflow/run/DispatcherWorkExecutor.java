@@ -11,7 +11,7 @@ import java.util.concurrent.*;
 
 public class DispatcherWorkExecutor implements ExecutorService {
 
-    private final ExecutorService executorService = Executors.newFixedThreadPool(0);
+    private final ExecutorService executorService = Executors.newFixedThreadPool(1);
 
     public void submit(Work work, Workflow workflow, WorkProcessing processing) {
         submit(() -> work.proceed(processing, workflow));

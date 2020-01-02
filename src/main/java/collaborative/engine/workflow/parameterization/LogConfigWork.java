@@ -11,6 +11,10 @@ import static collaborative.engine.ParameterGroup.LOG_CONFIG_FILE;
 
 public class LogConfigWork extends AbstractLoadYamlFileWork {
 
+    public LogConfigWork() {
+        super("Resolve-Log.yaml");
+    }
+
     @Override
     protected Parameter<Path> fileParameter() {
         return LOG_CONFIG_FILE;

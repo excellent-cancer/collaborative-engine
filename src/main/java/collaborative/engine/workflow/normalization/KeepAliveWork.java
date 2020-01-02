@@ -10,13 +10,17 @@ import pact.support.IgnoredSupport;
 
 import java.util.concurrent.CountDownLatch;
 
-public class KeepAliveWork implements Work {
+public class KeepAliveWork extends Work {
 
     private static Runnable keepAliveTask() {
         final CountDownLatch downLatch = new CountDownLatch(1);
         Runtime.getRuntime().addShutdownHook(new Thread(downLatch::countDown));
 
         return IgnoredSupport.collectIgnored(downLatch::await);
+    }
+
+    public KeepAliveWork() {
+        super("Keep-Process-Alive");
     }
 
     @Override

@@ -22,7 +22,7 @@ public class Workflow implements WorkService {
         this.workUnitExecutor = new WorkUnitExecutor();
         this.processing = WorkProcessingSupport.processing(carcinogenFactor.carcinogen.parameterTable());
         this.carcinogenFactor = carcinogenFactor;
-        this.carcinogenFactor.handleStartProceedWork(work -> workUnitExecutor.submit(work, this, processing));
+        this.carcinogenFactor.handleStartProceedWork(work -> workUnitExecutor.invoke(work, this, processing));
     }
 
     @Override

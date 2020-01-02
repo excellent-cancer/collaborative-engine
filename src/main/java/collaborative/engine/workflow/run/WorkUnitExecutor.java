@@ -5,6 +5,7 @@ import collaborative.engine.workflow.WorkProcessing;
 import collaborative.engine.workflow.Workflow;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.concurrent.ForkJoinPool;
@@ -16,17 +17,15 @@ public class WorkUnitExecutor extends ForkJoinPool {
 
     private static final Logger LOGGER = LogManager.getLogger(WorkUnitExecutor.class);
 
-    public void submit(Work work, Workflow workflow, WorkProcessing processing) {
-        LOGGER.debug("submit new work: \"{}\"", work.getClass().getSimpleName());
+    public void submit(@NotNull Work work, Workflow workflow, WorkProcessing processing) {
         submit(new RecursiveWork(work, workflow, processing));
     }
 
-    public void invoke(Work work, Workflow workflow, WorkProcessing processing) {
-        LOGGER.debug("invoke new work: \"{}\"", work.getClass().getSimpleName());
+    public void invoke(@NotNull Work work, Workflow workflow, WorkProcessing processing) {
         invoke(new RecursiveWork(work, workflow, processing));
     }
 
-    public void invokeAll(List<Work> works, Workflow workflow, WorkProcessing processing) {
+    public void invokeAll(@NotNull List<Work> works, Workflow workflow, WorkProcessing processing) {
         ForkJoinTask.invokeAll(
                 works.stream().
                         map(work -> new RecursiveWork(work, workflow, processing)).
@@ -48,13 +47,14 @@ public class WorkUnitExecutor extends ForkJoinPool {
         @Override
         protected void compute() {
             try {
+                processing.reportStartWork(work);
                 work.proceed(processing, workflow);
             } catch (Exception e) {
+                processing.reportFailedWork(work);
                 workflow.fail(e);
             }
 
-            LOGGER.debug("done work: \"{}\"", work.getClass().getSimpleName());
-
+            processing.reportDoneWork(work);
             workflow.fork(work.getClass());
         }
     }

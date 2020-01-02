@@ -21,6 +21,10 @@ public class CollaborativeConfigWork extends AbstractLoadYamlFileWork {
 
     private static final Logger LOGGER = LogManager.getLogger(CollaborativeConfigWork.class);
 
+    public CollaborativeConfigWork() {
+        super("Resolve-Collaborative.yaml");
+    }
+
     @Override
     protected Parameter<Path> fileParameter() {
         return COLLABORATIVE_CONFIG_FILE;

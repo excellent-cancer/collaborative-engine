@@ -3,7 +3,7 @@
     <Appenders>
         <Console name="Console" target="SYSTEM_OUT">
             <PatternLayout
-                    pattern="%highlight{[%d{HH:mm.ss,SSS}][%-5level][$${status:a}][#%-4T][%-36t][%-24logger{1}] - %msg%n%xEx}"/>
+                    pattern="%highlight{[%d{HH:mm.ss,SSS}][%-5level][$${status:a}][#%-4T][%-24t][%-20logger{1}] - %msg%n%xEx}"/>
         </Console>
     </Appenders>
     <Loggers>

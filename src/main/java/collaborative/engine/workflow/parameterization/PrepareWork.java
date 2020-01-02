@@ -14,7 +14,7 @@ import static collaborative.engine.ParameterGroup.USER_DIRECTORY;
  *
  * @author XyParaCrim
  */
-public class PrepareWork implements Work {
+public class PrepareWork extends Work {
 
     @Override
     public void proceed(WorkProcessing workProcessing, Workflow workflow) {

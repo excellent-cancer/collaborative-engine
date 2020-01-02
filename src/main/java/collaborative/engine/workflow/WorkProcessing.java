@@ -4,17 +4,31 @@ import collaborative.engine.parameterize.Parameter;
 import collaborative.engine.parameterize.ParameterTable;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import pact.annotation.NotNull;
 import pact.etc.ConfigureCheckProcessing;
 
 import java.util.Objects;
 
 /**
- *  Provides access to the parameter set and save workflow variables.
+ * Provides access to the parameter set and save workflow variables.
+ *
  * @author XyParaCrim
  */
 public class WorkProcessing implements ConfigureCheckProcessing {
 
-    private static final Logger LOGGER = LogManager.getLogger(WorkProcessing.class);
+    private static final Logger LOGGER = LogManager.getLogger();
+
+    public void reportStartWork(@NotNull Work work) {
+        LOGGER.debug("[{}]: start work", work.tagName());
+    }
+
+    public void reportDoneWork(@NotNull Work work) {
+        LOGGER.debug("[{}]: done work", work.tagName());
+    }
+
+    public void reportFailedWork(@NotNull Work work) {
+        LOGGER.debug("[{}]: failed work", work.tagName());
+    }
 
     @Override
     public Logger logger() {

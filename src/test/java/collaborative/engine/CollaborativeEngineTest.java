@@ -24,7 +24,6 @@ import static collaborative.engine.ParameterGroup.CONFIG_DIRECTORY;
 public class CollaborativeEngineTest {
 
     public static void main(String[] args) {
-        // new KeepAliveWork().proceed(null, null);
         new CollaborativeEngineTest().sampleConfigDirectory("/Users/yanjiaxun/Library/Preferences/IntelliJIdea2019.3/scratches/collaborative-engine/config");
     }
 

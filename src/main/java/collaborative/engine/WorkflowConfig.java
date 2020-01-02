@@ -24,11 +24,7 @@ public class WorkflowConfig implements CollaborativeCarcinogen {
 
     @ProceedEachAfter(ConfigDirectoryWork.class)
     public Work loadConfigWorkSlot() {
-        return WorkFactory.parallel(
-                new LogConfigWork(),
-                new WorkflowConfigWork(),
-                new CollaborativeConfigWork()
-        );
+        return null;
     }
 
     @Override
