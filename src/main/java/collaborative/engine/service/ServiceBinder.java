@@ -1,12 +1,10 @@
 package collaborative.engine.service;
 
-public class ServiceBinder {
+public interface ServiceBinder {
 
-    public <T> BindOptions<T> bind(Class<T> type) {
-        return null;
-    }
+    <T> BindOptions<T> bind(Class<T> type);
 
-    public interface BindOptions<T> {
+    interface BindOptions<T> {
         void as();
 
         void as(T instance);
@@ -15,5 +13,4 @@ public class ServiceBinder {
 
         void asSingleton(T instance);
     }
-
 }

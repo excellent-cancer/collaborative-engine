@@ -23,7 +23,7 @@ public class ConfigDirectoryWork extends CheckForWork.ParallelCheckWork {
 
     @Override
     public boolean check(WorkProcessing processing) {
-        Path directoryPath = processing.parameter(CONFIG_DIRECTORY);
+        Path directoryPath = CONFIG_DIRECTORY.get(processing.parameterTable());
         return checkDirectory(processing, directoryPath) &&
                 checkConfigFileExists(processing, directoryPath.resolve("log.yaml"), LOG_CONFIG_FILE) &&
                 checkConfigFileExists(processing, directoryPath.resolve("workflow.yaml"), WORKFLOW_CONFIG_FILE) &&
@@ -71,7 +71,7 @@ public class ConfigDirectoryWork extends CheckForWork.ParallelCheckWork {
     private boolean checkConfigFileExists(WorkProcessing processing, Path filePath, Parameter<Path> parameter) {
         if (Files.exists(filePath)) {
             processing.reportConfigureFound(filePath.getFileName().toString());
-            processing.setParameter(parameter, filePath);
+            parameter.set(processing.parameterTable(), filePath);
             return true;
         }
         processing.reportConfigureNotFound(filePath.getFileName().toString(), filePath);

@@ -1,32 +1,29 @@
 package collaborative.engine.workflow.normalization;
 
-import collaborative.engine.service.ServiceBuilder;
 import collaborative.engine.service.ServicePlatform;
 import collaborative.engine.workflow.Work;
 import collaborative.engine.workflow.WorkProcessing;
 import collaborative.engine.workflow.Workflow;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
-import java.util.Arrays;
-import java.util.List;
 
 public class AssemblyServicesWork extends Work {
 
-    private static final Logger LOGGER = LogManager.getLogger(AssemblyServicesWork.class);
+    // sprivate static final Logger LOGGER = LogManager.getLogger(AssemblyServicesWork.class);
 
-    private final List<ServiceBuilder> assemblyServices;
+    // private final List<ServiceBuilder> assemblyServices;
 
-    public AssemblyServicesWork(ServiceBuilder... services) {
+    public AssemblyServicesWork() {
         super("Assembly-Services");
-        assemblyServices = Arrays.asList(services);
+/*        assemblyServices = Stream.of(services).
+                filter(Objects::nonNull).
+                collect(Collectors.toUnmodifiableList());*/
     }
 
     @Override
     public void proceed(WorkProcessing workProcessing, Workflow workflow) {
-        ServicePlatform platform = workProcessing.getInstance(ServicePlatform.class);
+        ServicePlatform platform = workProcessing.servicePlatform();
+        // ServiceBinder serviceBinder = ServiceSupport.bindService(workProcessing::con);
 
-        try {
+/*        try {
             for (ServiceBuilder serviceBuilder : assemblyServices) {
                 if (serviceBuilder != null) {
                     platform.install(serviceBuilder);
@@ -37,10 +34,6 @@ public class AssemblyServicesWork extends Work {
         } catch (Exception e) {
             platform.closeResources();
             workflow.fail(e);
-        }
-    }
-
-    private static void reportLostServiceBuilder() {
-
+        }*/
     }
 }

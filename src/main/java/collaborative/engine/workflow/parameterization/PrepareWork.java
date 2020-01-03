@@ -20,7 +20,7 @@ public class PrepareWork extends Work {
     public void proceed(WorkProcessing workProcessing, Workflow workflow) {
         Path usrDir = Paths.get(System.getProperty("user.dir"));
 
-        workProcessing.setParameter(USER_DIRECTORY, usrDir);
+        USER_DIRECTORY.set(workProcessing.parameterTable(), usrDir);
     }
 
     public static final class Mysteriously implements WorkSlot<PrepareWork> {

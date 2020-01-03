@@ -17,7 +17,7 @@ import static pact.support.ReflectSupport.walkMethod;
 @SuppressWarnings("unused")
 public class CarcinogenFactor {
 
-    public final CollaborativeCarcinogen carcinogen;
+    private final CollaborativeCarcinogen carcinogen;
 
     private final List<Method> startWork;
 
@@ -108,6 +108,10 @@ public class CarcinogenFactor {
         return nameSlotsMap.containsKey(workSlot) ?
                 nameSlotsMap.get(workSlot).stream().map(this::newWorkInstance).collect(Collectors.toUnmodifiableList()) :
                 Collections.emptyList();
+    }
+
+    public CollaborativeCarcinogen carcinogen() {
+        return carcinogen;
     }
 
     public static CarcinogenFactor analysis(CollaborativeCarcinogen carcinogen) {

@@ -5,6 +5,8 @@ import collaborative.engine.workflow.run.WorkflowExecutor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.util.Objects;
+
 public class Workflow implements WorkService {
 
     private static final Logger LOGGER = LogManager.getLogger(Workflow.class);
@@ -14,9 +16,9 @@ public class Workflow implements WorkService {
     private final CarcinogenFactor carcinogenFactor;
 
     public Workflow(CarcinogenFactor carcinogenFactor) {
+        this.carcinogenFactor = Objects.requireNonNull(carcinogenFactor);
         this.workflowExecutor = new WorkflowExecutor();
-        this.processing = WorkProcessingSupport.processing(carcinogenFactor.carcinogen::configurateParameterTable);
-        this.carcinogenFactor = carcinogenFactor;
+        this.processing = WorkProcessingSupport.processing(carcinogenFactor.carcinogen());
         this.carcinogenFactor.handleStartProceedWork(work -> workflowExecutor.invoke(work, this, processing));
     }
 
