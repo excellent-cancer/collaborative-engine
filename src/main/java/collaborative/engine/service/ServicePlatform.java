@@ -8,5 +8,15 @@ public final class ServicePlatform {
         PLATFORM = new ServicePlatform();
     }
 
+    public void install(ServiceBuilder serviceBuilder) {
 
+    }
+
+    public void start() {
+
+    }
+
+    public void closeResources() {
+
+    }
 }

@@ -18,6 +18,14 @@ public class WorkProcessing implements ConfigureCheckProcessing {
 
     private static final Logger LOGGER = LogManager.getLogger();
 
+    public <T> T getInstance(Class<T> type) {
+        throw new UnsupportedOperationException();
+    }
+
+    public <T> void bind(Class<T> type, T instance) {
+        throw new UnsupportedOperationException();
+    }
+
     public void reportStartWork(@NotNull Work work) {
         LOGGER.debug("[{}]: start work", work.tagName());
     }

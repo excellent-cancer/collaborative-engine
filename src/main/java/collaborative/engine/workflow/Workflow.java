@@ -15,7 +15,7 @@ public class Workflow implements WorkService {
 
     public Workflow(CarcinogenFactor carcinogenFactor) {
         this.workflowExecutor = new WorkflowExecutor();
-        this.processing = WorkProcessingSupport.processing(carcinogenFactor.carcinogen.parameterTable());
+        this.processing = WorkProcessingSupport.processing(carcinogenFactor.carcinogen::configurateParameterTable);
         this.carcinogenFactor = carcinogenFactor;
         this.carcinogenFactor.handleStartProceedWork(work -> workflowExecutor.invoke(work, this, processing));
     }

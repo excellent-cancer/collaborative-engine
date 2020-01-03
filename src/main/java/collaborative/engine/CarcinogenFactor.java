@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 
 import static pact.support.ReflectSupport.walkMethod;
 
+@SuppressWarnings("unused")
 public class CarcinogenFactor {
 
     public final CollaborativeCarcinogen carcinogen;

@@ -1,8 +1,5 @@
 package collaborative.engine.workflow;
 
-import collaborative.engine.workflow.DispatcherWork;
-import collaborative.engine.workflow.Work;
-
 /**
  * Control and organize workflow(like filter).
  * Copy {@link java.util.stream.Stream} to learn how
@@ -16,13 +13,9 @@ public interface WorkService {
         throw new UnsupportedOperationException();
     }
 
-    ;
-
     default void finish(boolean immediately) {
         throw new UnsupportedOperationException();
     }
-
-    ;
 
     void fork(Class<? extends Work> workClass);
 

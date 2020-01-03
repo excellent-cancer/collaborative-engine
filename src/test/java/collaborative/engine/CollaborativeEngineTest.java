@@ -1,6 +1,7 @@
 package collaborative.engine;
 
 import collaborative.engine.parameterize.ParameterTable;
+import collaborative.engine.service.ServiceBinder;
 import collaborative.engine.workflow.Work;
 import collaborative.engine.workflow.config.Proceed;
 import collaborative.engine.workflow.config.ProceedEachAfter;
@@ -13,6 +14,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import pact.annotation.NotNull;
 
 import java.nio.file.Paths;
 import java.util.concurrent.ForkJoinPool;
@@ -75,12 +77,25 @@ public class CollaborativeEngineTest {
         }
 
         @Override
-        public ParameterTable parameterTable() {
-            ParameterTable parameterTable = new ParameterTable();
+        public void configurateParameterTable(@NotNull ParameterTable parameterTable) {
             CONFIG_DIRECTORY.set(parameterTable, Paths.get(path));
-            return parameterTable;
         }
 
+        @Override
+        public void configurateServices(@NotNull ServiceBinder serviceBinder) {
+            serviceBinder.bind(CollaborativeEngineTest.class).asSingleton();
+            serviceBinder.bind(ForkJoinWorker.class).as(new ForkJoinWorker(null));
+            serviceBinder.bind(CollaborativeEngineTest.class).asSingleton();
+            serviceBinder.bind(ForkJoinWorker.class).as(new ForkJoinWorker(null));
+            serviceBinder.bind(CollaborativeEngineTest.class).asSingleton();
+            serviceBinder.bind(ForkJoinWorker.class).as(new ForkJoinWorker(null));
+            serviceBinder.bind(CollaborativeEngineTest.class).asSingleton();
+            serviceBinder.bind(ForkJoinWorker.class).as(new ForkJoinWorker(null));
+            serviceBinder.bind(CollaborativeEngineTest.class).asSingleton();
+            serviceBinder.bind(ForkJoinWorker.class).as(new ForkJoinWorker(null));
+            serviceBinder.bind(CollaborativeEngineTest.class).asSingleton();
+            serviceBinder.bind(ForkJoinWorker.class).as(new ForkJoinWorker(null));
+        }
     }
 
     public static class ForkJoinWorker extends ForkJoinWorkerThread {
