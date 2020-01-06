@@ -1,6 +1,6 @@
 package collaborative.engine;
 
-import collaborative.engine.inject.module.ModuleInjectRuler;
+import collaborative.engine.inject.module.ModuleBinder;
 import collaborative.engine.parameterize.ParameterTable;
 import collaborative.engine.service.ServiceBinder;
 import collaborative.engine.service.ServicePlatform;
@@ -63,9 +63,9 @@ class TestWorkflowConfig implements CollaborativeCarcinogen {
     // Configure others
 
     @Override
-    public void configurateModules(@NotNull ModuleInjectRuler moduleBinder) {
-        moduleBinder.rule(ParameterTable.class).asDefault();
-        moduleBinder.rule(ServicePlatform.class).asDefault();
+    public void configurateModules(@NotNull ModuleBinder moduleBinder) {
+        moduleBinder.bind(ParameterTable.class);
+        moduleBinder.bind(ServicePlatform.class);
     }
 
     @Override
