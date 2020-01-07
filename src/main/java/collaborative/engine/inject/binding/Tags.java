@@ -1,14 +1,18 @@
 package collaborative.engine.inject.binding;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Objects;
+import java.util.function.Supplier;
 
+import static collaborative.engine.inject.binding.Bindings.BindingStrategy;
+
+@SuppressWarnings({"unused", "FieldCanBeLocal"})
 public final class Tags {
 
     // Sign injection point
 
     public interface PointedTag {
-
     }
 
     private static class DefaultPointedTag implements PointedTag {
@@ -46,50 +50,126 @@ public final class Tags {
 
     // Sign injection type
 
-    public interface SourceTag {
+    public interface SourceTag<T> {
 
-        boolean isSingleton();
+        Class<T> sourceType();
+
+        BindingStrategy bindingStrategy();
+
+        Supplier<T> createSupplier();
+
+        default boolean isSingleton() {
+            return bindingStrategy().isSingletonMode();
+        }
     }
 
-    public static class InstanceTag implements SourceTag {
+    private static class InstanceTag<T> implements SourceTag<T> {
 
-        private final Object instance;
+        private final T instance;
+        private final Class<T> type;
+        private final BindingStrategy bindingStrategy = BindingStrategy.INSTANCE;
 
-        private InstanceTag(Object instance) {
+        public InstanceTag(Class<T> type, T instance) {
+            this.type = type;
             this.instance = instance;
         }
 
         @Override
-        public boolean isSingleton() {
-            return true;
-        }
-    }
-
-    public static class ConstructorTag implements SourceTag {
-
-        private final Class<?> implementation;
-        private final boolean isSingleton;
-
-        private ConstructorTag(Class<?> implementation, boolean isSingleton) {
-            this.implementation = implementation;
-            this.isSingleton = isSingleton;
+        public Class<T> sourceType() {
+            return type;
         }
 
         @Override
-        public boolean isSingleton() {
-            return false;
+        public BindingStrategy bindingStrategy() {
+            return bindingStrategy;
+        }
+
+        @Override
+        public Supplier<T> createSupplier() {
+            return () -> instance;
         }
     }
 
-    public static SourceTag constructorTag(boolean isSingleton) {
-        return new ConstructorTag(null, isSingleton);
+    @SuppressWarnings("FieldCanBeLocal")
+    private static class ConstructorTag<T> implements SourceTag<T> {
+
+        private final Class<T> type;
+        private final BindingStrategy bindingStrategy;
+
+        private ConstructorTag(Class<T> type, BindingStrategy bindingStrategy) {
+            this.type = type;
+            this.bindingStrategy = bindingStrategy;
+        }
+
+        @Override
+        public Class<T> sourceType() {
+            return type;
+        }
+
+        @Override
+        public BindingStrategy bindingStrategy() {
+            return bindingStrategy;
+        }
+
+        @Override
+        public Supplier<T> createSupplier() {
+            // TODO
+            return () -> {
+                try {
+                    return type.getConstructor().newInstance();
+                } catch (InstantiationException | InvocationTargetException | IllegalAccessException | NoSuchMethodException e) {
+                    throw new RuntimeException(e);
+                }
+            };
+        }
     }
 
-    public static SourceTag constructorTag(Class<?> implementation, boolean isSingleton) {
-        return new ConstructorTag(implementation, isSingleton);
+    @SuppressWarnings("FieldCanBeLocal")
+    private static class ImplementationTag<T> implements SourceTag<T> {
+        private final Class<T> type;
+        private final Class<? extends T> implementation;
+        private final BindingStrategy bindingStrategy;
+
+        public ImplementationTag(Class<T> type, Class<? extends T> implementation, BindingStrategy bindingStrategy) {
+            this.type = type;
+            this.implementation = implementation;
+            this.bindingStrategy = bindingStrategy;
+        }
+
+        @Override
+        public Class<T> sourceType() {
+            return type;
+        }
+
+        @Override
+        public BindingStrategy bindingStrategy() {
+            return bindingStrategy;
+        }
+
+        @Override
+        public Supplier<T> createSupplier() {
+            // TODO
+            return () -> {
+                try {
+                    return implementation.getConstructor().newInstance();
+                } catch (InstantiationException | InvocationTargetException | IllegalAccessException | NoSuchMethodException e) {
+                    throw new RuntimeException(e);
+                }
+            };
+        }
     }
 
-    public static SourceTag instanceTag(Object instance) {
-        return new InstanceTag(instance);
+    public static <T> SourceTag<T> constructorTag(Class<T> type, boolean isSingleton) {
+        return new ConstructorTag<>(type,
+                isSingleton ? BindingStrategy.CONSTRUCTOR_SINGLETON : BindingStrategy.CONSTRUCTOR_FACTORY);
+    }
+
+    public static <T> SourceTag<T> implementationTag(Class<T> type, Class<? extends T> implementation, boolean isSingleton) {
+        return new ImplementationTag<>(type, implementation,
+                isSingleton ? BindingStrategy.IMPLEMENTATION_SINGLETON : BindingStrategy.IMPLEMENTATION_FACTORY);
+    }
+
+    public static <T> SourceTag<T> instanceTag(Class<T> type, T instance) {
+        return new InstanceTag<>(type, instance);
     }
 }

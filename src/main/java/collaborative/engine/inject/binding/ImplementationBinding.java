@@ -1,10 +1,5 @@
 package collaborative.engine.inject.binding;
 
-public class ImplementationBinding extends Binding {
+public abstract class ImplementationBinding<T> implements Binding<T> {
 
-    private final Class<?> implementation;
-
-    public ImplementationBinding(Class<?> implementation) {
-        this.implementation = implementation;
-    }
 }

@@ -1,5 +1,6 @@
 package collaborative.engine;
 
+import collaborative.engine.inject.Binder;
 import collaborative.engine.parameterize.ParameterTable;
 import collaborative.engine.service.ServiceBinder;
 import pact.annotation.NotNull;
@@ -25,12 +26,17 @@ public class WorkflowConfig implements CollaborativeCarcinogen {
     }*/
 
     @Override
-    public void configurateParameterTable(@NotNull ParameterTable parameterTable) {
+    public void configurateModules(@NotNull Binder moduleBinder) {
 
     }
 
     @Override
     public void configurateServices(@NotNull ServiceBinder serviceBinder) {
+
+    }
+
+    @Override
+    public void configurateParameterTable(@NotNull ParameterTable parameterTable) {
 
     }
 }

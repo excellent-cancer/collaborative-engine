@@ -12,7 +12,7 @@ import static collaborative.engine.inject.BindingOptional.PointedOptional;
 public class ModuleOptional<T> implements BindingOptional<T>, PointedOptional {
 
     final Class<T> type;
-    Tags.SourceTag sourceTag;
+    Tags.SourceTag<T> sourceTag;
     Tags.PointedTag pointedTag;
 
     public ModuleOptional(Class<T> type) {
@@ -24,31 +24,31 @@ public class ModuleOptional<T> implements BindingOptional<T>, PointedOptional {
 
     @Override
     public PointedOptional asSingleton() {
-        this.sourceTag = Tags.constructorTag(true);
+        this.sourceTag = Tags.constructorTag(type, true);
         return this;
     }
 
     @Override
     public PointedOptional asSingleton(@NotNull T instance) {
-        this.sourceTag = Tags.instanceTag(instance);
+        this.sourceTag = Tags.instanceTag(type, instance);
         return this;
     }
 
     @Override
     public PointedOptional asSingleton(@NotNull Class<? extends T> implementation) {
-        this.sourceTag = Tags.constructorTag(implementation, true);
+        this.sourceTag = Tags.implementationTag(type, implementation, true);
         return this;
     }
 
     @Override
     public PointedOptional asFactory() {
-        this.sourceTag = Tags.constructorTag(false);
+        this.sourceTag = Tags.constructorTag(type, false);
         return this;
     }
 
     @Override
     public PointedOptional asFactory(@NotNull Class<? extends T> implementation) {
-        this.sourceTag = Tags.constructorTag(implementation, false);
+        this.sourceTag = Tags.implementationTag(type, implementation, false);
         return this;
     }
 

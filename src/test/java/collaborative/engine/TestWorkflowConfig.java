@@ -1,6 +1,6 @@
 package collaborative.engine;
 
-import collaborative.engine.inject.module.ModuleBinder;
+import collaborative.engine.inject.Binder;
 import collaborative.engine.parameterize.ParameterTable;
 import collaborative.engine.service.ServiceBinder;
 import collaborative.engine.service.ServicePlatform;
@@ -62,8 +62,9 @@ class TestWorkflowConfig implements CollaborativeCarcinogen {
 
     // Configure others
 
+    @SuppressWarnings("PointlessBinding")
     @Override
-    public void configurateModules(@NotNull ModuleBinder moduleBinder) {
+    public void configurateModules(@NotNull Binder moduleBinder) {
         moduleBinder.bind(ParameterTable.class);
         moduleBinder.bind(ServicePlatform.class);
     }

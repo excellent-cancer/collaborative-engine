@@ -7,14 +7,14 @@ import java.util.function.Consumer;
 
 public final class InjectSupport {
 
-    public static Injector newInjectorByModule(Consumer<ModuleBinder> configurate) {
+    public static Injector createModuleInjector(Consumer<Binder> configurate) {
         Objects.requireNonNull(configurate);
         ModuleBinder moduleBinder = new ModuleBinder();
         configurate.accept(moduleBinder);
         return moduleBinder.newInjector();
     }
 
-    public static Injector newInjectorByModule(Consumer<ModuleBinder> configurate1, Consumer<ModuleBinder> configurate2) {
+    public static Injector createModuleInjector(Consumer<Binder> configurate1, Consumer<Binder> configurate2) {
         Objects.requireNonNull(configurate1);
         Objects.requireNonNull(configurate2);
 
@@ -25,7 +25,7 @@ public final class InjectSupport {
         return moduleBinder.newInjector();
     }
 
-    public static Injector newInjectorByModule(Consumer<ModuleBinder> configurate1, Consumer<ModuleBinder> configurate2, Consumer<ModuleBinder>... others) {
+    public static Injector createModuleInjector(Consumer<Binder> configurate1, Consumer<Binder> configurate2, Consumer<Binder>... others) {
         Objects.requireNonNull(configurate1);
         Objects.requireNonNull(configurate2);
 
@@ -34,12 +34,11 @@ public final class InjectSupport {
         configurate2.accept(moduleBinder);
 
         if (others.length > 0) {
-            for (Consumer<ModuleBinder> configurate : others) {
+            for (Consumer<Binder> configurate : others) {
                 Objects.requireNonNull(configurate);
                 configurate.accept(moduleBinder);
             }
         }
         return moduleBinder.newInjector();
     }
-
 }

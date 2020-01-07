@@ -1,11 +1,8 @@
 package collaborative.engine.inject.binding;
 
-import java.util.function.Supplier;
+public interface Binding<T> {
 
-public abstract class Binding {
+    Key<T> key();
 
-    public abstract Key<?> key();
-
-    public abstract <T> Supplier<T> supplier();
-
+    T instance();
 }

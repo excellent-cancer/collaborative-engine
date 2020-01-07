@@ -18,8 +18,7 @@ public final class WorkProcessingSupport {
         private final Injector moduleInjector;
 
         public WorkProcessingImp(CollaborativeCarcinogen carcinogen) {
-            this.moduleInjector = InjectSupport.newInjectorByModule(carcinogen::configurateModules);
-
+            this.moduleInjector = InjectSupport.createModuleInjector(carcinogen::configurateModules);
             ParameterTable parameterTable = Objects.requireNonNull(parameterTable());
             carcinogen.configurateParameterTable(parameterTable);
         }

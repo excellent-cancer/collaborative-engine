@@ -1,11 +1,27 @@
 package collaborative.engine.inject.binding;
 
-public class InstanceBinding extends Binding {
+@SuppressWarnings({"unused", "FieldCanBeLocal"})
+class InstanceBinding<T> implements Binding<T> {
 
-    private final Object instance;
+    private final Key<T> key;
+    private final T instance;
+    private final Tags.PointedTag pointedTag;
+    private final Tags.SourceTag<T> sourceTag;
 
-    public InstanceBinding(Object instance) {
-        this.instance = instance;
+    InstanceBinding(Tags.PointedTag pointedTag, Tags.SourceTag<T> sourceTag) {
+        this.pointedTag = pointedTag;
+        this.sourceTag = sourceTag;
+        this.key = Keys.get(sourceTag.sourceType(), pointedTag);
+        this.instance = sourceTag.createSupplier().get();
     }
 
+    @Override
+    public Key<T> key() {
+        return key;
+    }
+
+    @Override
+    public T instance() {
+        return instance;
+    }
 }

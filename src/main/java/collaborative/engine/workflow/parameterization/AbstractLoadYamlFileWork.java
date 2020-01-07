@@ -5,6 +5,7 @@ import collaborative.engine.parameterize.Parameter;
 import collaborative.engine.workflow.Work;
 import collaborative.engine.workflow.WorkProcessing;
 import collaborative.engine.workflow.Workflow;
+import pact.annotation.NotNull;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -18,7 +19,7 @@ abstract class AbstractLoadYamlFileWork extends Work {
 
     @Override
     public void proceed(WorkProcessing workProcessing, Workflow workflow) {
-        Path yamlFile = workProcessing.parameter(fileParameter());
+        Path yamlFile = fileParameter().get(workProcessing.parameterTable());
         Map<String, Object> properties = null;
 
         try {
@@ -30,6 +31,7 @@ abstract class AbstractLoadYamlFileWork extends Work {
         buildParameterTable(properties, workProcessing, workflow);
     }
 
+    @NotNull
     protected abstract Parameter<Path> fileParameter();
 
     protected abstract void buildParameterTable(Map<String, Object> properties, WorkProcessing workProcessing, Workflow workflow);
