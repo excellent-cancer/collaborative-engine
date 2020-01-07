@@ -6,7 +6,8 @@ import org.apache.logging.log4j.core.lookup.StrLookup;
 
 import java.util.concurrent.ThreadLocalRandom;
 
-@Plugin(name="status", category = "Lookup")
+@SuppressWarnings("unused")
+@Plugin(name = "status", category = "Lookup")
 public class StatusLookup implements StrLookup {
     @Override
     public String lookup(String key) {

@@ -12,7 +12,6 @@ public class Key<T> {
         this.type = type;
         this.tag = tag;
         this.hashCode = Objects.hash(type, tag);
-        ;
     }
 
     @Override
