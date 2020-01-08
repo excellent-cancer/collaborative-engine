@@ -24,9 +24,10 @@ class CachedContentProvider implements ContentProvider {
             e.printStackTrace();
         }
         assert lines != null;
-        this.linesBuffer = lines.stream()
-                .map(StringBuffer::new)
-                .collect(Collectors.toCollection(ConcurrentLinkedQueue::new));
+        this.linesBuffer = lines.
+                stream().
+                map(StringBuffer::new).
+                collect(Collectors.toCollection(ConcurrentLinkedQueue::new));
         this.file = file;
     }
 

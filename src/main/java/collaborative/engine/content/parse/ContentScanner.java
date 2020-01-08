@@ -1,4 +1,4 @@
-package collaborative.engine.content.core;
+package collaborative.engine.content.parse;
 
 import collaborative.engine.content.common.LineColumn;
 

@@ -3,8 +3,7 @@ package collaborative.engine.content.yaml;
 
 import collaborative.engine.content.common.LineColumn;
 import collaborative.engine.content.common.Paragraph;
-import collaborative.engine.content.core.ContentScanner;
-import collaborative.engine.content.core.Token;
+import collaborative.engine.content.parse.ContentScanner;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

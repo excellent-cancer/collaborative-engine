@@ -3,12 +3,12 @@ package collaborative.engine.workflow.normalization;
 import collaborative.engine.workflow.DispatcherWork;
 import collaborative.engine.workflow.WorkProcessing;
 import collaborative.engine.workflow.Workflow;
-import pact.cmp.lifecycle.LifecycleFactory;
-import pact.cmp.lifecycle.ServiceLifecycle;
+import pact.component.lifecycle.Lifecycle;
+import pact.component.lifecycle.ServiceLifecycle;
 
 public class SampleDispatcherWork extends DispatcherWork {
 
-    private ServiceLifecycle lifecycle = LifecycleFactory.service();
+    private ServiceLifecycle lifecycle = Lifecycle.service();
 
     public SampleDispatcherWork() {
         super("Sample-Dispatcher");

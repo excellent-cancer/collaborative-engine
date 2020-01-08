@@ -3,8 +3,8 @@ package collaborative.engine;
 import collaborative.engine.workflow.Workflow;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import pact.cmp.lifecycle.LifecycleFactory;
-import pact.cmp.lifecycle.ServiceLifecycle;
+import pact.component.lifecycle.Lifecycle;
+import pact.component.lifecycle.ServiceLifecycle;
 
 import java.util.Objects;
 import java.util.function.Supplier;
@@ -22,7 +22,7 @@ public final class CollaborativeEngine {
 
     private volatile static Workflow ROOT_WORKFLOW = null;
 
-    private volatile static ServiceLifecycle LIFECYCLE = LifecycleFactory.service();
+    private volatile static ServiceLifecycle LIFECYCLE = Lifecycle.service();
 
     /**
      * Static helper that can be used to run a engine from

@@ -2,7 +2,7 @@ package collaborative.engine.content.yaml;
 
 import collaborative.engine.content.common.LineColumn;
 import collaborative.engine.content.common.Paragraph;
-import collaborative.engine.content.core.Token;
+import collaborative.engine.content.parse.Token;
 import pact.annotation.DataStruct;
 
 /**

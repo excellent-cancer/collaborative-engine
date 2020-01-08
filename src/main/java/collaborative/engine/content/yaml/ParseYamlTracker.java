@@ -1,6 +1,6 @@
 package collaborative.engine.content.yaml;
 
-import collaborative.engine.content.core.Token;
+import collaborative.engine.content.parse.Token;
 import pact.annotation.NotNull;
 import pact.annotation.Unqualified;
 

@@ -1,6 +1,6 @@
 package collaborative.engine.content.yaml;
 
-import collaborative.engine.content.core.Parse;
+import collaborative.engine.content.parse.Parse;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
