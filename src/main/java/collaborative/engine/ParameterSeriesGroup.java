@@ -41,4 +41,9 @@ public final class ParameterSeriesGroup {
     public static final ParameterSeries BASE_PARAMETER =
             ParameterSupport.prefix("base");
 
+    /**
+     * About work site.
+     */
+    public static final ParameterSeries WORK_SITE_PARAMETER =
+            ParameterSupport.prefix("work-site");
 }

@@ -10,10 +10,20 @@ public class CollaboratoryTest {
     @Test
     @DisplayName("test facade's api")
     public void facade() {
-        try (Collaboratory collaboratory = CollaborativeCommands.init().call()) {
+        try (Collaboratory collaboratory = CollaborativeCommands.
+                init().
+                setDir("/Users/yanjiaxun/Library/Preferences/IntelliJIdea2019.3/scratches/collaborative-engine/data").
+                exec()) {
 
-            collaboratory.commands().status().call();
-            collaboratory.commands().history().call();
+            collaboratory.
+                    commands().
+                    status().
+                    exec();
+
+            collaboratory.
+                    commands().
+                    history().
+                    exec();
 
         } catch (Exception ignored) {
 

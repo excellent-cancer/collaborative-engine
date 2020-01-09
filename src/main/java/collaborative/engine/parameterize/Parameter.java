@@ -20,4 +20,8 @@ public interface Parameter<T> {
     default String name() {
         return null;
     }
+
+    default void update(ParameterTable variables, T value) {
+        throw new UnsupportedOperationException();
+    }
 }

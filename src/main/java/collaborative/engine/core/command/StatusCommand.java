@@ -2,15 +2,14 @@ package collaborative.engine.core.command;
 
 import collaborative.engine.core.Collaboratory;
 
-import java.util.concurrent.Callable;
-
-public class StatusCommand implements Callable<Void> {
+public class StatusCommand extends Command<Void> {
 
     public StatusCommand(Collaboratory collaboratory) {
+        super();
     }
 
     @Override
-    public Void call() throws Exception {
+    public Void exec() throws CollaborativeCommandException {
         return null;
     }
 }

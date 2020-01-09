@@ -22,4 +22,8 @@ public final class ParameterGroup {
     public static final Parameter<Path> USER_DIRECTORY = BASE_PARAMETER.make("usrDirectory");
 
     public static final Parameter<Path> LOG_CONFIG_FILE = LOG_CONFIG.make("file");
+
+    public static final Parameter<String> WORK_SITE_DATA = WORK_SITE_PARAMETER.make("data");
+
+    public static final Parameter<Path> WORK_SITE_DATA_DIRECTORY = WORK_SITE_PARAMETER.make("directory");
 }
