@@ -13,14 +13,7 @@ public class InitCommand extends Command<Collaboratory> {
 
     @Override
     public Collaboratory exec() throws CollaborativeCommandException {
-        try {
-            validate();
-            return builder.build();
-        } catch (Exception e) {
-            throw new CollaborativeCommandException(e.getMessage(), e);
-        } finally {
-            executed();
-        }
+        return once(builder::build);
     }
 
     // Optional parameters
@@ -35,13 +28,23 @@ public class InitCommand extends Command<Collaboratory> {
         return this;
     }
 
-    public InitCommand metadata(File metadata) {
-        builder.setWorksite(metadata);
+    public InitCommand setWorkSite(File metadata) {
+        builder.setWorkSite(metadata);
         return this;
     }
 
-    public InitCommand contentSystem(ContentSystem contentSystem) {
+    public InitCommand setContentSystem(ContentSystem contentSystem) {
         builder.setContentSystem(contentSystem);
+        return this;
+    }
+
+    public InitCommand notAllowNewIfNotExist() {
+        builder.setRequireExisted(true);
+        return this;
+    }
+
+    public InitCommand allowRemoveAnotherIfNew() {
+        builder.setRequirePureLocationIfCreate(false);
         return this;
     }
 }

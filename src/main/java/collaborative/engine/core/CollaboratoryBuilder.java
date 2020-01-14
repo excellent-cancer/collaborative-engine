@@ -15,6 +15,10 @@ public class CollaboratoryBuilder {
 
     private ContentSystem contentSystem;
 
+    private boolean requirePureLocationIfCreate;
+
+    private boolean requireExisted;
+
     public File getDirectory() {
         return directory;
     }
@@ -32,8 +36,16 @@ public class CollaboratoryBuilder {
         return this;
     }
 
+    public boolean isRequirePureLocationIfCreate() {
+        return requirePureLocationIfCreate;
+    }
+
+    public boolean isRequireExisted() {
+        return requireExisted;
+    }
+
     public CollaboratoryBuilder setWorkSite(File workSite) {
-        this.workSite = worksite;
+        this.workSite = workSite;
         return this;
     }
 
@@ -42,16 +54,28 @@ public class CollaboratoryBuilder {
         return this;
     }
 
+    public CollaboratoryBuilder setRequirePureLocationIfCreate(boolean requirePureLocationIfCreate) {
+        this.requirePureLocationIfCreate = requirePureLocationIfCreate;
+        return this;
+    }
+
+    public CollaboratoryBuilder setRequireExisted(boolean requireExisted) {
+        this.requireExisted = requireExisted;
+        return this;
+    }
+
     // Check required parameters
 
-    private void requireWorkSite() {
-        if (workSite == null) {
-            throw new IllegalArgumentException("WorkSite is not locked");
+    private void requireWorkSiteOrDirectory() {
+        if (workSite == null && directory == null) {
+            throw new IllegalArgumentException("One of workSite or directory must be set.");
         }
     }
 
     private void requireQualifiedCollaboratory(Collaboratory collaboratory) {
-        if (!collaboratory.qualified()) {
+        if (!collaboratory.
+                status().
+                qualified()) {
             throw new CollaboratoryDisqualifiedException();
         }
     }
@@ -63,10 +87,10 @@ public class CollaboratoryBuilder {
     // Check parameters and fill missing
 
     private CollaboratoryBuilder setup() {
-        requireWorkSite();
+        requireWorkSiteOrDirectory();
         setupContentSystem();
         setupDirectory();
-        setupMetadataDirectory();
+        setupWorkSite();
         return this;
     }
 
@@ -76,21 +100,26 @@ public class CollaboratoryBuilder {
         }
     }
 
-    private void setupMetadataDirectory() {
-        throw new UnsupportedOperationException();
+    private void setupWorkSite() {
+        if (workSite == null) {
+            workSite = new File(directory, ".workSite");
+        }
     }
 
     private void setupContentSystem() {
-        throw new UnsupportedOperationException();
+        this.contentSystem = null;
+        // throw new UnsupportedOperationException();
     }
 
     // Build method
 
     public Collaboratory build() {
-        Collaboratory collaboratory = Collaboratory.create(setup());
+        Collaboratory collaboratory = new Collaboratory(setup());
 
-        requireQualifiedCollaboratory(collaboratory);
-        requireMutex(collaboratory);
+        collaboratory.
+                status().
+                requireQualified().
+                requireMutex();
 
         return collaboratory;
     }

@@ -1,8 +1,6 @@
-package collaborative.engine.core;
+package collaborative.engine.core.command;
 
-import collaborative.engine.core.command.HistoryCommand;
-import collaborative.engine.core.command.InitCommand;
-import collaborative.engine.core.command.StatusCommand;
+import collaborative.engine.core.Collaboratory;
 
 public class CollaborativeCommands {
 
@@ -20,6 +18,10 @@ public class CollaborativeCommands {
 
     public StatusCommand status() {
         return new StatusCommand(collaboratory);
+    }
+
+    public CreateFileCommand createFile() {
+        return new CreateFileCommand(collaboratory);
     }
 
     // Global commands

@@ -31,10 +31,14 @@ public class FileParameterTable extends ParameterTable implements AutoCloseable 
         return new FileParameterTable(file);
     }
 
-    public static FileParameterTable create(File file, String child) throws IOException {
+    public static FileParameterTable create(File file, String child, boolean createIfNotExist) throws IOException {
         file = FileSupport.childFile(file, child);
         if (!file.exists()) {
-            Files.createFile(file.toPath());
+            if (createIfNotExist) {
+                Files.createFile(file.toPath());
+            } else {
+                throw new IOException();
+            }
         }
 
         return new FileParameterTable(file);
