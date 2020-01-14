@@ -2,7 +2,7 @@ package collaborative.engine.core.command;
 
 import collaborative.engine.core.Collaboratory;
 import collaborative.engine.core.Defaults;
-import collaborative.engine.core.FileStore;
+import collaborative.engine.core.databse.FileDatabase;
 import org.apache.logging.log4j.LogManager;
 
 import java.io.File;
@@ -27,12 +27,14 @@ public class CreateFileCommand extends SpecifiedCommand<Void> {
             // 执行验证条件
             requireNonBlank(suffix);
             status().requireQualified();
-            FileStore fileStore = components().fileStore();
+
+            FileDatabase fileDatabase = components().fileStore();
+
             UUID uuid = UUID.randomUUID();
             String uuidStr = uuid.toString();
             String directory = uuidStr.substring(0, 2);
             String name = uuidStr.substring(2);
-            File target = Paths.get(fileStore.location().getPath(), directory, name).toFile();
+            File target = Paths.get(fileDatabase.location().getPath(), directory, name).toFile();
             File source = File.createTempFile("temp", suffix);
             target.getParentFile().mkdir();
             Files.move(source.toPath(), target.toPath(), StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);

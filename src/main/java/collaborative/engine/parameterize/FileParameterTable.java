@@ -18,9 +18,13 @@ public class FileParameterTable extends ParameterTable implements AutoCloseable 
         this.properties = ContentSupport.flatLoadYaml(file.toPath());
     }
 
+    public File getLocation() {
+        return file;
+    }
+
     @Override
     public void close() throws IOException {
-        throw new UnsupportedOperationException();
+        throw new RuntimeException();
     }
 
     public static FileParameterTable create(File file) throws IOException {

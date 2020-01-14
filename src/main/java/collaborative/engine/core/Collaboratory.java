@@ -1,6 +1,7 @@
 package collaborative.engine.core;
 
 import collaborative.engine.core.command.CollaborativeCommands;
+import collaborative.engine.core.databse.FileDatabase;
 import collaborative.engine.core.errors.WorkSiteNotFoundException;
 import collaborative.engine.parameterize.FileParameterTable;
 import org.apache.logging.log4j.LogManager;
@@ -20,6 +21,9 @@ public class Collaboratory extends AutoCloseComponent {
 
     private static final Logger LOGGER = LogManager.getLogger(Collaboratory.class);
 
+    /**
+     * main status control
+     */
     private final ResourceLifecycle lifecycle = Lifecycle.resource();
 
     // Core config
@@ -75,8 +79,15 @@ public class Collaboratory extends AutoCloseComponent {
     // Load and apply core config
 
     private boolean applyWorkSite(CollaboratoryBuilder options) {
+        boolean isRequireExisted = options.isRequireExisted();
+        return applyWorkSiteForDirectory(isRequireExisted) &&
+                applyWorkSiteForLock() &&
+                applyWorkSiteForParameters(isRequireExisted);
+    }
+
+    private boolean applyWorkSiteForDirectory(boolean isRequireExisted) {
         if (!workSite.isDirectory()) {
-            if (options.isRequireExisted()) {
+            if (isRequireExisted) {
                 LOGGER.error(new WorkSiteNotFoundException(workSite));
                 return false;
             }
@@ -87,6 +98,11 @@ public class Collaboratory extends AutoCloseComponent {
             }
         }
 
+        LOGGER.debug("Apply work-site location: {}", workSite);
+        return true;
+    }
+
+    private boolean applyWorkSiteForLock() {
         // check if it's used by other co-processes
         FileLock workSiteLock = FileSupport.getFileLock(new File(workSite, ".lock"));
         if (workSiteLock == null) {
@@ -94,16 +110,22 @@ public class Collaboratory extends AutoCloseComponent {
             return false;
         }
         createdComponent(FileLock.class, workSiteLock);
+        LOGGER.debug("Apply work-site lock");
+        return true;
+    }
 
+    private boolean applyWorkSiteForParameters(boolean isRequireExisted) {
         // get parameters.yaml file
+        FileParameterTable fileParameterTable;
         try {
-            createdComponent(FileParameterTable
-                    .class, FileParameterTable.create(workSite, "parameters.yaml", !options.isRequireExisted()));
+            fileParameterTable = FileParameterTable.create(workSite, "parameters.yaml", !isRequireExisted);
         } catch (IOException e) {
             LOGGER.error(e);
             return false;
         }
 
+        createdComponent(FileParameterTable.class, fileParameterTable);
+        LOGGER.debug("Apply work-site parameters file: {}", fileParameterTable.getLocation());
         return true;
     }
 
@@ -113,7 +135,7 @@ public class Collaboratory extends AutoCloseComponent {
             return false;
         }
 
-        createdComponent(FileStore.class, new FileStore(this, directory));
+        createdComponent(FileDatabase.class, new FileDatabase(this, directory));
 
 /*        FileParameterTable parameterTable = component(FileParameterTable.class);
         String directoryFromParameter = WORK_SITE_DATA.get(parameterTable);
@@ -153,8 +175,7 @@ public class Collaboratory extends AutoCloseComponent {
         public AnalysisReport(boolean qualifiedWorkSite, boolean qualifiedDirectory, boolean newlyCreated) {
             this.qualifiedWorkSite = qualifiedWorkSite;
             this.qualifiedDirectory = qualifiedDirectory;
-            // TODO 通过参数表的版本数更新
-            this.newlyCreated = newlyCreated;
+            this.newlyCreated = newlyCreated; // TODO 通过参数表的版本数更新
         }
     }
 }

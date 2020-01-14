@@ -1,5 +1,6 @@
 package collaborative.engine.core;
 
+import collaborative.engine.core.databse.FileDatabase;
 import collaborative.engine.parameterize.FileParameterTable;
 
 public final class CollaborativeComponents {
@@ -9,8 +10,8 @@ public final class CollaborativeComponents {
         this.collaboratory = collaboratory;
     }
 
-    public FileStore fileStore() {
-        return collaboratory.component(FileStore.class);
+    public FileDatabase fileStore() {
+        return collaboratory.component(FileDatabase.class);
     }
 
     public FileParameterTable parameterTable() {

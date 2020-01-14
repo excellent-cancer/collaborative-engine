@@ -3,6 +3,7 @@ package collaborative.engine.core;
 /**
  * @author XyParaCrim
  */
+@SuppressWarnings("MethodCanBeVoid")
 public class CollaborativeStatus {
     private final Collaboratory collaboratory;
 
@@ -10,10 +11,14 @@ public class CollaborativeStatus {
         this.collaboratory = collaboratory;
     }
 
+    // Status query method
+
     public boolean qualified() {
         return collaboratory.analysisReport.qualifiedWorkSite &&
                 collaboratory.analysisReport.qualifiedDirectory;
     }
+
+    // Checks that the specified status
 
     public CollaborativeStatus requireQualified() {
         if (!qualified()) {

@@ -6,8 +6,6 @@ import org.apache.logging.log4j.LogManager;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-
 public class CollaboratoryTest {
 
     @Test
@@ -21,9 +19,8 @@ public class CollaboratoryTest {
 
             collaboratory.commands().createFile().exec();
 
-        } catch (Exception ignored) {
-            LogManager.getLogger().error(ignored);
-            assertNotNull(ignored);
+        } catch (Exception closeException) {
+            LogManager.getLogger().error("An error occurred when auto-closing", closeException);
         }
     }
 
