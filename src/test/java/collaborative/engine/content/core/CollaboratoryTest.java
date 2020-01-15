@@ -1,6 +1,7 @@
 package collaborative.engine.content.core;
 
 import collaborative.engine.core.Collaboratory;
+import collaborative.engine.core.ContentSystem;
 import collaborative.engine.core.command.CollaborativeCommands;
 import org.apache.logging.log4j.LogManager;
 import org.junit.jupiter.api.DisplayName;
@@ -14,6 +15,7 @@ public class CollaboratoryTest {
         try (Collaboratory collaboratory = CollaborativeCommands.
                 init().
                 setDir("/Users/yanjiaxun/Library/Preferences/IntelliJIdea2019.3/scratches/collaborative-engine/data").
+                setContentSystem(new ContentSystem()).
                 allowRemoveAnotherIfNew().
                 exec()) {
 

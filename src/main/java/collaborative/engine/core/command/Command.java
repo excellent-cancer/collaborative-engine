@@ -30,6 +30,4 @@ public abstract class Command<T> {
             executed();
         }
     }
-
-
 }

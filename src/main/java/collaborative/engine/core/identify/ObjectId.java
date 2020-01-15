@@ -4,6 +4,11 @@ import java.io.File;
 
 public interface ObjectId {
 
-    File toFile(File first);
+    File location();
 
+    File groupLocation();
+
+    void used();
+
+    ObjectId unmodifiable();
 }

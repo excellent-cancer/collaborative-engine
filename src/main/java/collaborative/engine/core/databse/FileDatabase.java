@@ -4,10 +4,13 @@ import collaborative.engine.core.Collaboratory;
 import collaborative.engine.core.ContentSystem;
 import collaborative.engine.core.identify.Identifier;
 import collaborative.engine.core.identify.ObjectId;
+import pact.support.FileSupport;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.*;
 
+@SuppressWarnings({"unused", "FieldCanBeLocal"})
 public class FileDatabase implements AutoCloseable {
 
     private final Collaboratory collaboratory;
@@ -25,7 +28,20 @@ public class FileDatabase implements AutoCloseable {
         this.identifier = ContentSystem.newIdentifier();
     }
 
-    public ObjectId insert(File file, InsertOption... options) {
+    public boolean contains(ObjectId objectId) {
+        if (identifier.contains(objectId)) {
+            return true;
+        }
+
+        if (objectId.location().exists()) {
+            identifier.add(objectId);
+            return true;
+        }
+
+        return false;
+    }
+
+    public ObjectId insert(File file, InsertOption... options) throws IOException {
         Set<InsertOption> optionSet;
         if (options.length > 0) {
             optionSet = new HashSet<>(options.length);
@@ -36,14 +52,19 @@ public class FileDatabase implements AutoCloseable {
         return insert(file, optionSet);
     }
 
-    private ObjectId insert(File file, Collection<InsertOption> options) {
-        // 信任这次插入操作
-        if (options.contains(InsertOption.UNSUSPECTING)) {
-            ObjectId objectId = identifier.newId();
-            File objectFile = objectId.toFile(directory);
-            objectFile.getParentFile().mkdir();
+    private ObjectId insert(File file, Collection<InsertOption> options) throws IOException {
+        // 插入的为临时文件，并且信任这次插入操作
+        if (options.contains(PromissoryInsertOption.TEMP)) {
+            ObjectId objectId;
+            while (contains(objectId = identifier.newId())) {
+                objectId.used();
+            }
 
-            // TODO 加上retry次数，objectId独占功能
+            FileSupport.mkdir(objectId.groupLocation());
+            FileSupport.atomicMove(file, objectId.location());
+            identifier.add(objectId);
+
+            return objectId.unmodifiable();
         } else {
             Objects.requireNonNull(file);
             throw new UnsupportedOperationException();

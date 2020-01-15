@@ -2,15 +2,13 @@ package collaborative.engine.core.command;
 
 import collaborative.engine.core.Collaboratory;
 import collaborative.engine.core.Defaults;
-import collaborative.engine.core.databse.FileDatabase;
+import collaborative.engine.core.identify.ObjectId;
 import org.apache.logging.log4j.LogManager;
+import pact.support.FileSupport;
 
 import java.io.File;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
-import java.util.UUID;
 
+import static collaborative.engine.core.databse.PromissoryInsertOption.TEMP;
 import static pact.support.CharSequenceSupport.requireNonBlank;
 
 public class CreateFileCommand extends SpecifiedCommand<Void> {
@@ -28,17 +26,10 @@ public class CreateFileCommand extends SpecifiedCommand<Void> {
             requireNonBlank(suffix);
             status().requireQualified();
 
-            FileDatabase fileDatabase = components().fileStore();
+            File source = FileSupport.createTempFile(suffix);
+            ObjectId objectId = components().fileStore().insert(source, TEMP);
 
-            UUID uuid = UUID.randomUUID();
-            String uuidStr = uuid.toString();
-            String directory = uuidStr.substring(0, 2);
-            String name = uuidStr.substring(2);
-            File target = Paths.get(fileDatabase.location().getPath(), directory, name).toFile();
-            File source = File.createTempFile("temp", suffix);
-            target.getParentFile().mkdir();
-            Files.move(source.toPath(), target.toPath(), StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
-            LogManager.getLogger().info(uuidStr);
+            LogManager.getLogger().info("Create file: {}", objectId.location().getName());
             return null;
         });
     }

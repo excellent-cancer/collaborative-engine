@@ -104,7 +104,7 @@ public class Collaboratory extends AutoCloseComponent {
 
     private boolean applyWorkSiteForLock() {
         // check if it's used by other co-processes
-        FileLock workSiteLock = FileSupport.getFileLock(new File(workSite, ".lock"));
+        FileLock workSiteLock = FileSupport.acquireFileLockWithCreate(new File(workSite, ".lock"));
         if (workSiteLock == null) {
             LOGGER.error("The workSite has been occupied: {}", workSite);
             return false;
@@ -135,7 +135,7 @@ public class Collaboratory extends AutoCloseComponent {
             return false;
         }
 
-        createdComponent(FileDatabase.class, new FileDatabase(this, directory));
+        createdComponent(FileDatabase.class, new FileDatabase(this, directory, contentSystem));
 
 /*        FileParameterTable parameterTable = component(FileParameterTable.class);
         String directoryFromParameter = WORK_SITE_DATA.get(parameterTable);
