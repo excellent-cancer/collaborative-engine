@@ -1,8 +1,11 @@
 package collaborative.engine.core;
 
 import collaborative.engine.core.errors.CollaboratoryDisqualifiedException;
+import pact.support.FunctionSupport;
 
 import java.io.File;
+import java.util.LinkedList;
+import java.util.List;
 
 @SuppressWarnings("unused")
 public class CollaboratoryBuilder {
@@ -18,6 +21,8 @@ public class CollaboratoryBuilder {
     private boolean requirePureLocationIfCreate;
 
     private boolean requireExisted;
+
+    private final List<FunctionSupport.ConsumerWithException<Collaboratory, Exception>> shutdownHooks = new LinkedList<>();
 
     public File getDirectory() {
         return directory;
@@ -61,6 +66,11 @@ public class CollaboratoryBuilder {
 
     public CollaboratoryBuilder setRequireExisted(boolean requireExisted) {
         this.requireExisted = requireExisted;
+        return this;
+    }
+
+    public CollaboratoryBuilder addShutdownCommand(FunctionSupport.ConsumerWithException<Collaboratory, Exception> hook) {
+        shutdownHooks.add(hook);
         return this;
     }
 

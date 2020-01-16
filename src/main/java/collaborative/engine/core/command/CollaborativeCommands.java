@@ -1,6 +1,8 @@
 package collaborative.engine.core.command;
 
 import collaborative.engine.core.Collaboratory;
+import collaborative.engine.core.Defaults;
+
 
 public class CollaborativeCommands {
 
@@ -21,7 +23,11 @@ public class CollaborativeCommands {
     }
 
     public CreateFileCommand createFile() {
-        return new CreateFileCommand(collaboratory);
+        return new CreateFileCommand(collaboratory, Defaults.DEFAULT_EXTENSION);
+    }
+
+    public RemoveCollabortativeCommand delete() {
+        return new RemoveCollabortativeCommand(collaboratory);
     }
 
     // Global commands

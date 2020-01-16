@@ -10,6 +10,11 @@ import java.io.File;
 import java.io.IOException;
 import java.util.*;
 
+/**
+ * 本地文件数据库，提供一致添加、删除等文件操作。并且实现文件的并发访问与读写。
+ *
+ * @author XyParaCrim
+ */
 @SuppressWarnings({"unused", "FieldCanBeLocal"})
 public class FileDatabase implements AutoCloseable {
 
@@ -25,7 +30,7 @@ public class FileDatabase implements AutoCloseable {
         this.collaboratory = collaboratory;
         this.directory = directory;
         this.contentSystem = contentSystem;
-        this.identifier = ContentSystem.newIdentifier();
+        this.identifier = contentSystem.newIdentifier();
     }
 
     public boolean contains(ObjectId objectId) {
@@ -77,6 +82,6 @@ public class FileDatabase implements AutoCloseable {
 
     @Override
     public void close() throws Exception {
-
+        // TODO
     }
 }
