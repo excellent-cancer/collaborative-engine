@@ -1,4 +1,15 @@
 Collaborative Engine
 ======================
 
-[wiki](https://github.com/excellent-cancer/collaborative-engine/wiki)
+# Goals
+
+  - [x] Code Control
+  
+  - [ ] Custom Executor
+  
+  - [x] Parse Config
+  
+  - [x] Simple File System
+  
+  - [ ] Concurrent modification
+  
