@@ -11,4 +11,6 @@ public interface Identifier {
     default void add(ObjectId objectId) {
 
     }
+
+    ObjectId toObjectId(String name);
 }

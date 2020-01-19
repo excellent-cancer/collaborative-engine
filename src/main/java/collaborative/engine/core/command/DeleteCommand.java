@@ -2,9 +2,9 @@ package collaborative.engine.core.command;
 
 import collaborative.engine.core.Collaboratory;
 
-public class RemoveCollabortativeCommand extends SpecifiedCommand<Void> {
+public class DeleteCommand extends SpecifiedCommand<Void> {
 
-    protected RemoveCollabortativeCommand(Collaboratory collaboratory) {
+    protected DeleteCommand(Collaboratory collaboratory) {
         super(collaboratory);
     }
 

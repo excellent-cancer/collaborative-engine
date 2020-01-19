@@ -7,6 +7,10 @@ public class CollaborativeCommandException extends Exception {
         super(message);
     }
 
+    public CollaborativeCommandException(Throwable cause) {
+        super(cause);
+    }
+
     public CollaborativeCommandException(String message, Throwable cause) {
         super(message, cause);
     }

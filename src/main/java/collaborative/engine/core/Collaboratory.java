@@ -7,7 +7,7 @@ import collaborative.engine.parameterize.FileParameterTable;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import pact.annotation.ClassTag;
-import pact.component.lifecycle.AutoCloseComponent;
+import pact.component.AutoCloseComponent;
 import pact.component.lifecycle.Lifecycle;
 import pact.component.lifecycle.ResourceLifecycle;
 import pact.support.FileSupport;
@@ -47,14 +47,6 @@ public class Collaboratory extends AutoCloseComponent {
     // Class Tags
 
     final AnalysisReport analysisReport;
-
-    // Features object
-
-    private final CollaborativeStatus status;
-
-    private final CollaborativeCommands commands;
-
-    private final CollaborativeComponents components;
 
     protected Collaboratory(CollaboratoryBuilder options) {
         this.workSite = options.getWorkSite();
@@ -104,7 +96,7 @@ public class Collaboratory extends AutoCloseComponent {
 
     private boolean applyWorkSiteForLock() {
         // check if it's used by other co-processes
-        FileLock workSiteLock = FileSupport.acquireFileLockWithCreate(new File(workSite, ".lock"));
+        FileLock workSiteLock = FileSupport.acquireFileLockWithCreate(new File(workSite, Defaults.LOCK_FILE));
         if (workSiteLock == null) {
             LOGGER.error("The workSite has been occupied: {}", workSite);
             return false;
@@ -151,6 +143,12 @@ public class Collaboratory extends AutoCloseComponent {
     }
 
     // Main export
+
+    private final CollaborativeStatus status;
+
+    private final CollaborativeCommands commands;
+
+    private final CollaborativeComponents components;
 
     public CollaborativeStatus status() {
         return status;

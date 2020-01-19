@@ -4,6 +4,11 @@ import collaborative.engine.core.Collaboratory;
 import collaborative.engine.core.Defaults;
 
 
+/**
+ * Collaborative的所有命令合集
+ *
+ * @author XyParaCrim
+ */
 public class CollaborativeCommands {
 
     private final Collaboratory collaboratory;
@@ -26,8 +31,12 @@ public class CollaborativeCommands {
         return new CreateFileCommand(collaboratory, Defaults.DEFAULT_EXTENSION);
     }
 
-    public RemoveCollabortativeCommand delete() {
-        return new RemoveCollabortativeCommand(collaboratory);
+    public RemoveFileCommand removeFile() {
+        return new RemoveFileCommand(collaboratory);
+    }
+
+    public DeleteCommand delete() {
+        return new DeleteCommand(collaboratory);
     }
 
     // Global commands
