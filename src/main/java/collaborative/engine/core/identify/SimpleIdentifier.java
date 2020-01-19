@@ -3,11 +3,22 @@ package collaborative.engine.core.identify;
 import java.io.File;
 import java.util.UUID;
 
+/**
+ * 实现草稿
+ *
+ * @author XyParaCrim
+ * @temp 不明确其的组成结构
+ */
 public class SimpleIdentifier implements Identifier {
 
     @Override
     public ObjectId newId() {
         return new ObjectUUID();
+    }
+
+    @Override
+    public ObjectId toObjectId(String name) {
+        return null;
     }
 
     private static class ObjectUUID implements ObjectId {
