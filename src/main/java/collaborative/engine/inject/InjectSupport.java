@@ -5,6 +5,12 @@ import collaborative.engine.inject.module.ModuleBinder;
 import java.util.Objects;
 import java.util.function.Consumer;
 
+
+/**
+ * 仿照Guice写的一个类似的依赖注入框架。这个类提供所有的依赖注入的功能。
+ *
+ * @author XyParaCrim
+ */
 public final class InjectSupport {
 
     public static Injector createModuleInjector(Consumer<Binder> configurate) {

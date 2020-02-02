@@ -48,6 +48,8 @@ public class Collaboratory extends AutoCloseComponent {
 
     final AnalysisReport analysisReport;
 
+    // Construct methods
+
     protected Collaboratory(CollaboratoryBuilder options) {
         this.workSite = options.getWorkSite();
         this.directory = options.getDirectory();

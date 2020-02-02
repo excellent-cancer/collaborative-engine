@@ -3,6 +3,7 @@ package collaborative.engine.core.databse;
 import collaborative.engine.core.Collaboratory;
 import collaborative.engine.core.ContentSystem;
 import collaborative.engine.core.identify.Identifier;
+import collaborative.engine.core.identify.IdentifyUtil;
 import collaborative.engine.core.identify.ObjectId;
 import pact.support.FileSupport;
 
@@ -38,14 +39,11 @@ public class FileDatabase implements Database {
 
     @Override
     public boolean contains(ObjectId objectId) {
-        if (identifier.contains(objectId)) {
-            return true;
-        }
-        if (objectId.location().exists()) {
-            identifier.add(objectId);
-            return true;
-        }
-        return false;
+        // 这里先查询这个objectId是否已经存在缓存中
+        // 如果为否，则查询这个objectId文件是否已经存在文件系统中
+        // 如果存在，则将其加入缓存。
+        return IdentifyUtil.hasBeenCached(objectId) ||
+                IdentifyUtil.hasBeenCreatedWithCache(objectId);
     }
 
     @Override
@@ -60,17 +58,13 @@ public class FileDatabase implements Database {
     private InsertResult insertTemp(File temp, Collection<InsertOption> options) {
         // 插入的为临时文件，并且信任这次插入操作
         // 这一步是因为，可能这些objectId可能实际就是在文件系统里的文件
-        ObjectId objectId;
-        while (contains(objectId = identifier.newId())) {
-            objectId.cache();
-        }
-
+        ObjectId objectId = IdentifyUtil.newStrictObject(identifier, this::contains);
         try {
             FileSupport.mkdir(objectId.groupLocation());
             FileSupport.atomicMove(temp, objectId.location());
 
             // 这一步表识该id已使用，但很可能是不对的，再议
-            identifier.add(objectId);
+            objectId.cache();
         } catch (IOException e) {
             return InsertResult.failure(objectId, e);
         }

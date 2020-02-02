@@ -42,6 +42,13 @@ public interface ObjectId {
     void uncache();
 
     /**
+     * 查询这个Id是否已经缓存
+     *
+     * @return 是否已经缓存
+     */
+    boolean inCache();
+
+    /**
      * 与{@link ObjectId#release()}对应。尝试独占这个objectId的使用权
      *
      * @return 是否得到其的使用权
