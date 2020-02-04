@@ -4,6 +4,11 @@ package collaborative.engine.core.identify;
 import java.util.Objects;
 import java.util.function.Predicate;
 
+/**
+ * 帮助和解释方法。
+ *
+ * @author XyParaCrim
+ */
 public final class IdentifyUtil {
 
     // 相关具体数据常量
@@ -44,7 +49,7 @@ public final class IdentifyUtil {
      * 返回一个未使用的objectId，如果无法创建则会抛出相关的致命错误
      *
      * @param identifier objectId生产器
-     * @param contains   未使用的测试方法
+     * @param contains   未使用的测试方/法
      * @return 未使用的objectId
      */
     public static ObjectId newStrictObject(Identifier identifier, Predicate<ObjectId> contains) {

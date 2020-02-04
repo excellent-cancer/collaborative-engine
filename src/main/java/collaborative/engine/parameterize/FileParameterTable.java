@@ -12,10 +12,12 @@ public class FileParameterTable extends ParameterTable implements AutoCloseable 
 
     private final File file;
     private final Map<String, Object> properties;
+    private final boolean shouldRemoveFile;
 
-    private FileParameterTable(File file) throws IOException {
+    private FileParameterTable(File file, boolean shouldRemoveFile) throws IOException {
         this.file = file;
         this.properties = ContentSupport.flatLoadYaml(file.toPath());
+        this.shouldRemoveFile = shouldRemoveFile;
     }
 
     public File getLocation() {
@@ -24,7 +26,9 @@ public class FileParameterTable extends ParameterTable implements AutoCloseable 
 
     @Override
     public void close() throws IOException {
-        throw new RuntimeException();
+        if (shouldRemoveFile) {
+            FileSupport.deleteFile(file);
+        }
     }
 
     public static FileParameterTable create(File file) throws IOException {
@@ -32,10 +36,10 @@ public class FileParameterTable extends ParameterTable implements AutoCloseable 
             Files.createFile(file.toPath());
         }
 
-        return new FileParameterTable(file);
+        return new FileParameterTable(file, false);
     }
 
-    public static FileParameterTable create(File file, String child, boolean createIfNotExist) throws IOException {
+    public static FileParameterTable create(File file, String child, boolean createIfNotExist, boolean removeIfClose) throws IOException {
         file = FileSupport.childFile(file, child);
         if (!file.exists()) {
             if (createIfNotExist) {
@@ -45,6 +49,6 @@ public class FileParameterTable extends ParameterTable implements AutoCloseable 
             }
         }
 
-        return new FileParameterTable(file);
+        return new FileParameterTable(file, removeIfClose);
     }
 }

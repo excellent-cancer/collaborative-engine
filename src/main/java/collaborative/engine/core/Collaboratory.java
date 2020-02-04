@@ -2,7 +2,9 @@ package collaborative.engine.core;
 
 import collaborative.engine.core.command.CollaborativeCommands;
 import collaborative.engine.core.databse.FileDatabase;
+import collaborative.engine.core.errors.InitializeCollaboratoryException;
 import collaborative.engine.core.errors.WorkSiteNotFoundException;
+import collaborative.engine.core.lock.ProgressLock;
 import collaborative.engine.parameterize.FileParameterTable;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -10,11 +12,11 @@ import pact.annotation.ClassTag;
 import pact.component.AutoCloseComponent;
 import pact.component.lifecycle.Lifecycle;
 import pact.component.lifecycle.ResourceLifecycle;
+import pact.support.ExceptionSupport;
 import pact.support.FileSupport;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.channels.FileLock;
 
 @SuppressWarnings("unused")
 public class Collaboratory extends AutoCloseComponent {
@@ -44,6 +46,14 @@ public class Collaboratory extends AutoCloseComponent {
     @SuppressWarnings("FieldCanBeLocal")
     private final ContentSystem contentSystem;
 
+    // Main export features
+
+    private final CollaborativeStatus status;
+
+    private final CollaborativeCommands commands;
+
+    private final CollaborativeComponents components;
+
     // Class Tags
 
     final AnalysisReport analysisReport;
@@ -57,12 +67,22 @@ public class Collaboratory extends AutoCloseComponent {
 
         // 获取分析报告的各项指标
         // apply core parameters and generate analysis report
-        boolean qualifiedWorkSite, qualifiedDirectory = false;
-        if ((qualifiedWorkSite = applyWorkSite(options)) &&
-                (qualifiedDirectory = applyDirectory(options))) {
-            LOGGER.info("Successful analysis of various indicators.");
+        boolean success = true;
+        try {
+            boolean qualifiedWorkSite, qualifiedDirectory = false;
+            if ((qualifiedWorkSite = applyWorkSite(options)) &&
+                    (qualifiedDirectory = applyDirectory(options))) {
+                LOGGER.info("Successful analysis of various indicators.");
+            }
+            this.analysisReport = new AnalysisReport(qualifiedWorkSite, qualifiedDirectory, true);
+        } catch (Exception e) {
+            success = false;
+            throw new InitializeCollaboratoryException();
+        } finally {
+            if (!success) {
+                ExceptionSupport.closeWithExceptionHanding(this);
+            }
         }
-        this.analysisReport = new AnalysisReport(qualifiedWorkSite, qualifiedDirectory, true);
 
         // all feature objects
         this.status = new CollaborativeStatus(this);
@@ -74,21 +94,25 @@ public class Collaboratory extends AutoCloseComponent {
 
     private boolean applyWorkSite(CollaboratoryBuilder options) {
         boolean isRequireExisted = options.isRequireExisted();
-        return applyWorkSiteForDirectory(isRequireExisted) &&
+        return applyWorkSiteForDirectory(options) &&
                 applyWorkSiteForLock() &&
-                applyWorkSiteForParameters(isRequireExisted);
+                applyWorkSiteForParameters(options);
     }
 
-    private boolean applyWorkSiteForDirectory(boolean isRequireExisted) {
+    private boolean applyWorkSiteForDirectory(CollaboratoryBuilder options) {
         if (!workSite.isDirectory()) {
-            if (isRequireExisted) {
+            if (options.isRequireExisted()) {
                 LOGGER.error(new WorkSiteNotFoundException(workSite));
                 return false;
             }
 
             if (!workSite.mkdirs()) {
-                LOGGER.error("Failed to create wor-site directory: {}", workSite);
+                LOGGER.error("Failed to create work-site directory: {}", workSite);
                 return false;
+            }
+
+            if (options.isRemoveIfClose()) {
+                createdResrouce(() -> FileSupport.deleteFile(workSite));
             }
         }
 
@@ -98,21 +122,22 @@ public class Collaboratory extends AutoCloseComponent {
 
     private boolean applyWorkSiteForLock() {
         // check if it's used by other co-processes
-        FileLock workSiteLock = FileSupport.acquireFileLockWithCreate(new File(workSite, Defaults.LOCK_FILE));
-        if (workSiteLock == null) {
+        ProgressLock progressLock = new ProgressLock(workSite);
+        if (progressLock.invalid()) {
             LOGGER.error("The workSite has been occupied: {}", workSite);
             return false;
         }
-        createdComponent(FileLock.class, workSiteLock);
+
+        createdComponent(ProgressLock.class, progressLock);
         LOGGER.debug("Apply work-site lock");
         return true;
     }
 
-    private boolean applyWorkSiteForParameters(boolean isRequireExisted) {
+    private boolean applyWorkSiteForParameters(CollaboratoryBuilder options) {
         // get parameters.yaml file
         FileParameterTable fileParameterTable;
         try {
-            fileParameterTable = FileParameterTable.create(workSite, "parameters.yaml", !isRequireExisted);
+            fileParameterTable = FileParameterTable.create(workSite, "parameters.yaml", !options.isRequireExisted(), options.isRemoveIfClose());
         } catch (IOException e) {
             LOGGER.error(e);
             return false;
@@ -146,12 +171,6 @@ public class Collaboratory extends AutoCloseComponent {
 
     // Main export
 
-    private final CollaborativeStatus status;
-
-    private final CollaborativeCommands commands;
-
-    private final CollaborativeComponents components;
-
     public CollaborativeStatus status() {
         return status;
     }
@@ -162,6 +181,13 @@ public class Collaboratory extends AutoCloseComponent {
 
     public CollaborativeComponents components() {
         return components;
+    }
+
+    @Override
+    public void close() throws Exception {
+        LOGGER.info("Closing a collaboratory... - {}", directory);
+        super.close();
+        LOGGER.info("Collaboratory closed successfully - {}", directory);
     }
 
     // Tag class

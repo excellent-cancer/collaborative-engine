@@ -6,5 +6,4 @@ public class Defaults {
 
     public static final String LOCK_FILE = ".lock";
 
-
 }

@@ -7,6 +7,11 @@ import java.io.File;
 import java.util.LinkedList;
 import java.util.List;
 
+/**
+ * {@link Collaboratory}的构建器，提供一些选项。
+ *
+ * @author XyParaCrim
+ */
 @SuppressWarnings("unused")
 public class CollaboratoryBuilder {
 
@@ -21,6 +26,8 @@ public class CollaboratoryBuilder {
     private boolean requirePureLocationIfCreate;
 
     private boolean requireExisted;
+
+    private boolean removeIfClose;
 
     private final List<FunctionSupport.ConsumerWithException<Collaboratory, Exception>> shutdownHooks = new LinkedList<>();
 
@@ -49,6 +56,10 @@ public class CollaboratoryBuilder {
         return requireExisted;
     }
 
+    public boolean isRemoveIfClose() {
+        return removeIfClose;
+    }
+
     public CollaboratoryBuilder setWorkSite(File workSite) {
         this.workSite = workSite;
         return this;
@@ -66,6 +77,11 @@ public class CollaboratoryBuilder {
 
     public CollaboratoryBuilder setRequireExisted(boolean requireExisted) {
         this.requireExisted = requireExisted;
+        return this;
+    }
+
+    public CollaboratoryBuilder setRemoveIfClose(boolean removeIfClose) {
+        this.removeIfClose = removeIfClose;
         return this;
     }
 
@@ -97,7 +113,9 @@ public class CollaboratoryBuilder {
     // Check parameters and fill missing
 
     private CollaboratoryBuilder setup() {
+        // 验证阶段
         requireWorkSiteOrDirectory();
+        // 设置阶段
         setupContentSystem();
         setupDirectory();
         setupWorkSite();
@@ -117,8 +135,10 @@ public class CollaboratoryBuilder {
     }
 
     private void setupContentSystem() {
-        this.contentSystem = null;
-        // throw new UnsupportedOperationException();
+        // TODO 完善默认ContentSystem的设置
+        if (contentSystem == null) {
+            contentSystem = new ContentSystem();
+        }
     }
 
     // Build method

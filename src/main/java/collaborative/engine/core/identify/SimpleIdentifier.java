@@ -62,6 +62,11 @@ public class SimpleIdentifier implements Identifier {
         }
 
         @Override
+        public boolean inCache() {
+            return cache.contains(this);
+        }
+
+        @Override
         public boolean acquire() {
             return false;
         }

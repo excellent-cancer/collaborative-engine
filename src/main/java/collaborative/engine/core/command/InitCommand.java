@@ -93,7 +93,8 @@ public class InitCommand extends Command<Collaboratory> {
      * @return 返回自身链式对象
      */
     public InitCommand temporary() {
-        builder.addShutdownCommand(collaboratory -> collaboratory.commands().delete().exec());
+        builder.setRemoveIfClose(true);
+        // builder.addShutdownCommand(collaboratory -> collaboratory.commands().delete().exec());
         return this;
     }
 }
