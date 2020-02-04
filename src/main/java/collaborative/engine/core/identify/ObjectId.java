@@ -27,9 +27,10 @@ public interface ObjectId {
     /**
      * 这里考虑返回一个无法修改资源使用权的对象
      *
+     * @param parent 设置一个parent
      * @return ？
      */
-    ObjectId unmodifiable();
+    ObjectId unmodifiable(File parent);
 
     /**
      * 缓存这个objectId

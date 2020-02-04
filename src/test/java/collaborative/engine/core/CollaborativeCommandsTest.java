@@ -3,6 +3,7 @@ package collaborative.engine.core;
 import collaborative.engine.core.command.CollaborativeCommandException;
 import collaborative.engine.core.command.CollaborativeCommands;
 import collaborative.engine.core.identify.Identifier;
+import collaborative.engine.core.identify.ObjectId;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -18,6 +19,8 @@ import static org.junit.jupiter.api.Assertions.*;
  * @author XyParaCrim
  */
 public class CollaborativeCommandsTest {
+
+    // 初始化命令测试
 
     @Test
     @DisplayName("测试无效初始化命令")
@@ -77,5 +80,26 @@ public class CollaborativeCommandsTest {
         assertNotNull(files);
         assertEquals(0, files.length);
         assertTrue(tempDirectory.delete());
+    }
+
+    // 文件创建命令测试
+
+    @Test
+    @DisplayName("测试创建文件命令")
+    public void testCreateFileCommand() {
+        assertDoesNotThrow(() -> {
+            try (Collaboratory collaboratory = CollaborativeCommands.
+                    init().
+                    setDir(Files.createTempDirectory(null).toFile()).
+                    temporary().
+                    exec()) {
+                ObjectId objectId = collaboratory.
+                        commands().
+                        createFile().
+                        exec();
+
+                assertTrue(objectId.location().exists());
+            }
+        });
     }
 }

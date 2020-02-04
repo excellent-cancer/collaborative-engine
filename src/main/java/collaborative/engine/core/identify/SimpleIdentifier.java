@@ -1,5 +1,7 @@
 package collaborative.engine.core.identify;
 
+import pact.support.FileSupport;
+
 import java.io.File;
 import java.util.UUID;
 
@@ -41,6 +43,12 @@ public class SimpleIdentifier implements Identifier {
             this.group = this.location.getParentFile();
         }
 
+        ObjectUUID(ObjectUUID objectId, File parent) {
+            this.uuid = objectId.uuid;
+            this.location = FileSupport.resolve(parent, objectId.location);
+            this.group = FileSupport.resolve(parent, objectId.group);
+        }
+
         @Override
         public File location() {
             return location;
@@ -77,8 +85,8 @@ public class SimpleIdentifier implements Identifier {
         }
 
         @Override
-        public ObjectId unmodifiable() {
-            return null;
+        public ObjectId unmodifiable(File parent) {
+            return new ObjectUUID(this, parent);
         }
 
         @Override

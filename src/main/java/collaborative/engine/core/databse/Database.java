@@ -13,11 +13,6 @@ import java.util.Set;
  */
 public interface Database extends AutoCloseable {
 
-    @Override
-    default void close() throws Exception {
-        // TODO
-    }
-
     // Working with data
 
     boolean contains(ObjectId objectId);

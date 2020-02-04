@@ -30,11 +30,14 @@ public class FileDatabase implements Database {
 
     private final ContentSystem contentSystem;
 
-    public FileDatabase(Collaboratory collaboratory, File directory, ContentSystem contentSystem) {
+    private final boolean removeLikeIfClose;
+
+    public FileDatabase(Collaboratory collaboratory, File directory, ContentSystem contentSystem, boolean removeLikeIfClose) {
         this.collaboratory = collaboratory;
         this.directory = directory;
         this.contentSystem = contentSystem;
         this.identifier = contentSystem.newIdentifier();
+        this.removeLikeIfClose = removeLikeIfClose;
     }
 
     @Override
@@ -60,8 +63,8 @@ public class FileDatabase implements Database {
         // 这一步是因为，可能这些objectId可能实际就是在文件系统里的文件
         ObjectId objectId = IdentifyUtil.newStrictObject(identifier, this::contains);
         try {
-            FileSupport.mkdir(objectId.groupLocation());
-            FileSupport.atomicMove(temp, objectId.location());
+            FileSupport.mkdir(directory, objectId.groupLocation());
+            FileSupport.atomicMove(temp, directory, objectId.location());
 
             // 这一步表识该id已使用，但很可能是不对的，再议
             objectId.cache();
@@ -69,7 +72,7 @@ public class FileDatabase implements Database {
             return InsertResult.failure(objectId, e);
         }
 
-        return InsertResult.inserted(objectId.unmodifiable());
+        return InsertResult.inserted(objectId.unmodifiable(directory));
     }
 
     @Override
@@ -116,5 +119,26 @@ public class FileDatabase implements Database {
     @Override
     public Identifier identifier() {
         return identifier;
+    }
+
+    @Override
+    public void close() throws Exception {
+        // TODO 移动合适的位置，因为文件数据库并不知道具体文件逻辑
+        // 只有Identifier知道
+        if (removeLikeIfClose) {
+            File[] groups = directory.listFiles(file -> {
+                String name = file.getName();
+
+                return name.length() == 2 &&
+                        Character.isLetterOrDigit(name.charAt(0)) &&
+                        Character.isLetterOrDigit(name.charAt(1));
+            });
+
+            if (groups != null) {
+                for (File group : groups) {
+                    FileSupport.deleteFile(group, true);
+                }
+            }
+        }
     }
 }
